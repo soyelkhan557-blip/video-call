@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Soyel Call Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
+        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; margin: 0; overflow: hidden; }
+        #remoteVideo { width: 100%; height: 100vh; object-fit: cover; background: #1e293b; }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 15px; border: 2px solid white; object-fit: cover; z-index: 10; }
+        .controls { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 20; }
+        .btn { width: 60px; height: 60px; border-radius: 30px; display: flex; items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+    <!-- লগইন স্ক্রিন -->
+    <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center">
+        <div class="mb-6 p-5 bg-indigo-600 rounded-[2rem] text-white shadow-xl rotate-3">
+            <span class="material-icons-round text-6xl -rotate-3">videocam</span>
+        </div>
+        <h1 class="text-4xl font-bold mb-2 text-slate-900">Soyel Call Pro</h1>
+        <p class="text-gray-500 mb-8">সহজ এবং নিরাপদ ভিডিও কলিং</p>
+        <button onclick="login()" class="bg-indigo-600 text-white px-10 py-5 rounded-full font-bold shadow-lg active:scale-95 transition-all">গুগল দিয়ে শুরু করুন</button>
+        <p class="mt-10 text-xs text-gray-400 font-bold tracking-widest uppercase">Developed by Soyel Khan</p>
+    </div>
+
+    <!-- ড্যাশবোর্ড স্ক্রিন -->
+    <div id="dashboard" class="hidden h-screen flex flex-col bg-slate-50">
+        <header class="p-6 bg-white shadow-sm flex justify-between items-center">
+            <h2 class="font-bold text-xl text-indigo-600">Soyel Call</h2>
+            <button onclick="location.reload()" class="text-gray-400"><span class="material-icons-round">logout</span></button>
+        </header>
+
+        <main class="p-6 flex-1 overflow-y-auto">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm mb-8 border border-slate-100">
+                <p class="text-slate-400 text-xs font-bold mb-2 uppercase tracking-widest">আপনার আইডি</p>
+                <div class="flex items-center justify-between">
+                    <span id="my-id" class="font-mono font-bold text-indigo-600 break-all select-all">লোড হচ্ছে...</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="text-sm font-bold text-slate-800 ml-1">বন্ধুকে কল দিন</h4>
+                <input id="friend-id" type="text" placeholder="বন্ধুর আইডি এখানে দিন" class="w-full p-5 border rounded-2xl outline-none focus:ring-2 ring-indigo-500 border-none bg-white shadow-sm">
+                <button onclick="startCall()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-lg shadow-indigo-100">ভিডিও কল দিন</button>
+            </div>
+            
+            <p class="mt-20 text-center text-[10px] text-gray-300 font-bold uppercase tracking-widest">Version 1.0 • Soyel Khan</p>
+        </main>
+    </div>
+
+    <!-- ভিডিও কল স্ক্রিন -->
+    <div id="call-screen" class="hidden fixed inset-0 z-[100] bg-black">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="controls">
+            <button onclick="location.reload()" class="btn bg-red-500"><span class="material-icons-round text-3xl">call_end</span></button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCv0-AIv6osWK_sPelrG_u-socZdlJfFDY",
+            authDomain: "video-3d955.firebaseapp.com",
+            projectId: "video-3d955",
+            storageBucket: "video-3d955.firebasestorage.app",
+            messagingSenderId: "1016513647050",
+            appId: "1:1016513647050:web:c089c4da5f6c00eb53bf33"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
+        let localStream = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('my-id').innerText = user.uid;
+                listenForCalls(user.uid);
+            }
+        });
+
+        async function login() { 
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await auth.signInWithPopup(provider); 
+        }
+
+        async function setupMedia() {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
+            document.getElementById('localVideo').srcObject = localStream;
+        }
+
+        async function startCall() {
+            const friendId = document.getElementById('friend-id').value;
+            if(!friendId) return alert("বন্ধুর আইডি দিন");
+            await setupMedia();
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('call-screen').classList.remove('hidden');
+            const callDoc = db.collection('calls').doc(friendId);
+            pc.onicecandidate = e => e.candidate && callDoc.collection('offerCandidates').add(e.candidate.toJSON());
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type } });
+            callDoc.onSnapshot(s => s.data()?.answer && pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)));
+            callDoc.collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+        }
+
+        function listenForCalls(uid) {
+            db.collection('calls').doc(uid).onSnapshot(async s => {
+                if (s.data()?.offer && !pc.currentRemoteDescription) {
+                    if (confirm("ভিডিও কল আসছে! রিসিভ করবেন?")) {
+                        await setupMedia();
+                        document.getElementById('dashboard').classList.add('hidden');
+                        document.getElementById('call-screen').classList.remove('hidden');
+                        const callDoc = db.collection('calls').doc(uid);
+                        pc.onicecandidate = e => e.candidate && callDoc.collection('answerCandidates').add(e.candidate.toJSON());
+                        await pc.setRemoteDescription(new RTCSessionDescription(s.data().offer));
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        await callDoc.update({ answer: { sdp: answer.sdp, type: answer.type } });
+                        callDoc.collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
