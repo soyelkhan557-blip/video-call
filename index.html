@@ -14,7 +14,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
         body { font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; background-image: url('bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-color: #0f172a; }
         .dark-overlay { background: rgba(0, 0, 0, 0.65); height: 100vh; width: 100%; display: flex; flex-direction: column; }
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px; }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; }
         video { width: 100%; height: 100vh; object-fit: cover; background: #000; }
         #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 160px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .contact-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 22px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
@@ -24,7 +24,7 @@
         .bubble-me { background: #4f46e5; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bubble-them { background: rgba(255,255,255,0.15); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
         .top-id-btn { background: #4f46e5; padding: 8px 18px; border-radius: 12px; color: white; font-weight: bold; font-size: 12px; }
-        #id-modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); padding: 20px; }
+        #id-modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); padding: 20px; }
         .id-card { background: linear-gradient(135deg, #4f46e5, #9333ea); padding: 30px; border-radius: 30px; width: 100%; max-width: 320px; text-align: center; color: white; }
     </style>
 </head>
@@ -37,7 +37,7 @@
         <!-- ১. লগইন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="glass p-12">
-                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 mb-6 mx-auto animate-pulse">
+                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 mb-6 mx-auto">
                 <h1 class="text-3xl font-bold text-white mb-8 italic">SOYEL PRO</h1>
                 <button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button>
             </div>
@@ -48,17 +48,17 @@
             <header class="flex justify-between items-center text-white mb-10">
                 <div class="flex items-center gap-3">
                     <img id="my-photo" src="" class="w-10 h-10 rounded-full border-2 border-indigo-400">
-                    <h2 id="my-name" class="font-bold text-lg">Soyel Khan</h2>
+                    <h2 id="my-name" class="font-bold text-lg">Soyel</h2>
                 </div>
                 <button onclick="showIdModal()" class="top-id-btn">MY ID</button>
             </header>
 
             <div class="space-y-6 overflow-y-auto flex-1">
                 <div class="flex gap-2">
-                    <input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none">
+                    <input id="target-id" type="text" placeholder="আইডি এখানে দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none focus:ring-1 ring-indigo-500">
                     <button onclick="addNewContact()" class="bg-indigo-600 text-white px-5 rounded-2xl font-bold text-xs">যোগ</button>
                 </div>
-                <h3 class="text-white/40 text-[10px] font-bold uppercase tracking-widest ml-1">বন্ধুদের তালিকা</h3>
+                <h3 class="text-white/40 text-[10px] font-bold uppercase tracking-widest ml-1">বন্ধু তালিকা</h3>
                 <div id="contact-list"></div>
             </div>
         </div>
@@ -67,9 +67,9 @@
     <!-- ৩. আইডি মডাল -->
     <div id="id-modal" onclick="closeIdModal()">
         <div class="id-card" onclick="event.stopPropagation()">
-            <p class="text-[10px] font-bold uppercase opacity-60 mb-2">আপনার কলিং আইডি</p>
+            <p class="text-[10px] font-bold uppercase opacity-60 mb-2">আপনার আইডি</p>
             <p id="my-id-display" class="font-mono text-xs break-all bg-black/30 p-4 rounded-xl border border-white/10 mb-6 font-bold">লোড হচ্ছে...</p>
-            <button onclick="copyMyID()" class="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold shadow-lg">আইডি কপি করুন</button>
+            <button onclick="copyMyID()" class="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold">কপি করুন</button>
             <button onclick="closeIdModal()" class="mt-6 text-[10px] uppercase font-bold opacity-40">বন্ধ করুন</button>
         </div>
     </div>
@@ -80,7 +80,7 @@
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
             <img id="chat-user-img" src="" class="w-10 h-10 rounded-full">
             <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4></div>
-            <button onclick="startCallFromChat()" class="p-2 bg-indigo-600 rounded-full shadow-lg"><span class="material-icons-round">videocam</span></button>
+            <button onclick="startCallFromChat()" class="p-2 bg-indigo-600 rounded-full"><span class="material-icons-round">videocam</span></button>
         </div>
         <div id="messages"></div>
         <div class="p-4 bg-black/40 backdrop-blur-xl flex gap-3 items-center">
@@ -92,33 +92,33 @@
     </div>
 
     <!-- ৫. ইনকামিং কল -->
-    <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-indigo-900 flex flex-col items-center justify-center text-white text-center">
-        <div class="w-28 h-28 rounded-full border-4 border-white/20 mb-6 animate-bounce">
-            <img id="caller-img" src="" class="w-full h-full rounded-full object-cover">
+    <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-indigo-950 flex flex-col items-center justify-center text-white text-center">
+        <div class="w-28 h-28 rounded-full border-4 border-white/20 mb-6 animate-bounce overflow-hidden">
+            <img id="caller-img" src="" class="w-full h-full object-cover">
         </div>
         <h2 id="caller-name" class="text-2xl font-bold mb-10">ভিডিও কল আসছে...</h2>
         <div class="flex gap-12">
-            <button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">videocam</span></button>
-            <button onclick="rejectCall()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">call_end</span></button>
+            <button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl">videocam</span></button>
+            <button onclick="rejectCall()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl">call_end</span></button>
         </div>
     </div>
 
-    <!-- ৬. ভিডিও পেজ -->
-    <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]">
-        <video id="remoteVideo" autoplay playsinline></video>
-        <video id="localVideo" autoplay playsinline muted></video>
-        <div class="absolute bottom-10 left-0 right-0 flex justify-center">
-            <button onclick="location.reload()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl"><span class="material-icons-round text-4xl text-white">call_end</span></button>
-        </div>
-    </div>
-
-    <!-- ৭. কল ডায়ালিং পেজ -->
+    <!-- ৬. কল ডায়ালিং পেজ -->
     <div id="calling-ui" class="hidden fixed inset-0 z-[3000] bg-black/80 flex flex-col items-center justify-center text-white">
         <div class="w-24 h-24 bg-indigo-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
             <span class="material-icons-round text-5xl">call_made</span>
         </div>
         <h2 class="text-2xl font-bold">কল যাচ্ছে...</h2>
         <button onclick="location.reload()" class="mt-20 bg-red-500 px-8 py-3 rounded-full font-bold">কেটে দিন</button>
+    </div>
+
+    <!-- ৭. ভিডিও স্ক্রিন -->
+    <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="absolute bottom-10 left-0 right-0 flex justify-center">
+            <button onclick="location.reload()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl"><span class="material-icons-round text-4xl text-white">call_end</span></button>
+        </div>
     </div>
 
     <script>
@@ -132,7 +132,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
-        let pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
+        let pc = null;
         let localStream, currentChatId, fileData = null;
         const ringtone = document.getElementById('ringtone'), dialtone = document.getElementById('dialtone');
 
@@ -145,12 +145,10 @@
                 document.getElementById('my-id-display').innerText = user.uid;
                 document.getElementById('my-name').innerText = user.displayName;
                 document.getElementById('my-photo').src = user.photoURL;
-                
-                // ১. নিজের প্রোফাইল আপডেট
                 await db.collection('users').doc(user.uid).set({ name: user.displayName, photo: user.photoURL, uid: user.uid });
                 
-                // ২. জরুরি: আগের সব পুরনো কল ডিলিট করা (অটো-কল ফিক্স)
-                await db.collection('calls').doc(user.uid).delete();
+                // অ্যাপ খোলার সময় শুধু একবার নিজের কল ডাটা ক্লিন করা
+                db.collection('calls').doc(user.uid).get().then(doc => { if(doc.exists) doc.ref.delete(); });
                 
                 listenForCalls(user.uid);
                 loadContacts(user.uid);
@@ -165,7 +163,6 @@
         function loadContacts(myUid) {
             db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => {
                 const list = document.getElementById('contact-list'); list.innerHTML = '';
-                if(snap.empty) list.innerHTML = '<p class="text-white/20 text-center py-10 text-xs italic">বন্ধুর আইডি যোগ করুন</p>';
                 snap.forEach(async doc => {
                     const fUid = doc.id;
                     const fData = (await db.collection('users').doc(fUid).get()).data();
@@ -177,7 +174,7 @@
         }
 
         async function addNewContact() {
-            const id = document.getElementById('target-id').value;
+            const id = document.getElementById('target-id').value.trim();
             if(!id || id === auth.currentUser.uid) return alert("সঠিক আইডি দিন");
             await db.collection('users').doc(auth.currentUser.uid).collection('contacts').doc(id).set({ added: true });
             await db.collection('users').doc(id).collection('contacts').doc(auth.currentUser.uid).set({ added: true });
@@ -187,74 +184,70 @@
         function openChat(id, name, photo) { currentChatId = id; document.getElementById('chat-user-name').innerText = name; document.getElementById('chat-user-img').src = photo; document.getElementById('chat-window').style.display = 'flex'; listenForMsg(id); }
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
 
-        async function sendMsg() {
-            const text = document.getElementById('msg-input').value;
-            if(!text && !fileData) return;
-            const chatId = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
-            await db.collection('chats').doc(chatId).collection('messages').add({ text: text || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp() });
-            document.getElementById('msg-input').value = ''; fileData = null;
-        }
-
-        function listenForMsg(friendId) {
-            const chatId = auth.currentUser.uid < friendId ? auth.currentUser.uid + "_" + friendId : friendId + "_" + auth.currentUser.uid;
-            db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => {
-                const div = document.getElementById('messages'); div.innerHTML = '';
-                s.forEach(d => {
-                    const data = d.data(); const isMe = data.sender === auth.currentUser.uid;
-                    let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2">` : '';
-                    div.innerHTML += `<div class="bubble ${isMe ? 'bubble-me' : 'bubble-them'}">${mediaHTML}${data.text}</div>`;
-                });
-                div.scrollTop = div.scrollHeight;
-            });
+        async function initRTC() {
+            pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
+            document.getElementById('localVideo').srcObject = localStream;
         }
 
         async function startCallFromChat() {
             dialtone.play();
             document.getElementById('calling-ui').classList.remove('hidden');
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
-            document.getElementById('localVideo').srcObject = localStream;
+            await initRTC();
             const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON());
+            const offerCandidates = callDoc.collection('offerCandidates');
+            const answerCandidates = callDoc.collection('answerCandidates');
+
+            pc.onicecandidate = e => e.candidate && offerCandidates.add(e.candidate.toJSON());
             const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now() });
-            callDoc.onSnapshot(s => { if (s.data()?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)); } });
-            callDoc.collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL });
+            
+            callDoc.onSnapshot(s => { 
+                const data = s.data();
+                if (data?.answer && !pc.currentRemoteDescription) { 
+                    dialtone.pause(); 
+                    document.getElementById('calling-ui').classList.add('hidden'); 
+                    document.getElementById('video-page').classList.remove('hidden'); 
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer)); 
+                } 
+            });
+            answerCandidates.onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
         }
 
         function listenForCalls(uid) {
             db.collection('calls').doc(uid).onSnapshot(async s => {
                 const data = s.data();
                 if (data?.offer && !pc.currentRemoteDescription) {
-                    // ৩. অত্যন্ত জরুরি: ১ মিনিটের পুরনো কল অফার ইগনোর করা (অটো-কল ফিক্স ২)
-                    if(Date.now() - data.ts > 60000) {
-                        return db.collection('calls').doc(uid).delete();
-                    }
                     currentChatId = uid;
-                    document.getElementById('caller-name').innerText = data.callerName || "বন্ধুর কল";
-                    document.getElementById('caller-img').src = data.callerPhoto || "https://cdn-icons-png.flaticon.com/512/3649/3649460.png";
-                    ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden');
+                    document.getElementById('caller-name').innerText = data.callerName;
+                    document.getElementById('caller-img').src = data.callerPhoto;
+                    ringtone.play(); 
+                    document.getElementById('incoming-ui').classList.remove('hidden');
                 }
             });
         }
 
         async function acceptCall() {
-            ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden');
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
-            document.getElementById('localVideo').srcObject = localStream;
-            const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('answerCandidates').add(e.candidate.toJSON());
+            ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); 
+            document.getElementById('video-page').classList.remove('hidden');
+            await initRTC();
+            const callDoc = db.collection('calls').doc(auth.currentUser.uid);
+            const offerCandidates = callDoc.collection('offerCandidates');
+            const answerCandidates = callDoc.collection('answerCandidates');
+
+            pc.onicecandidate = e => e.candidate && answerCandidates.add(e.candidate.toJSON());
             const offer = (await callDoc.get()).data().offer;
             await pc.setRemoteDescription(new RTCSessionDescription(offer));
             const answer = await pc.createAnswer(); await pc.setLocalDescription(answer);
             await callDoc.update({ answer: { sdp: answer.sdp, type: answer.type } });
-            callDoc.collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+            offerCandidates.onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
         }
 
         function rejectCall() { ringtone.pause(); db.collection('calls').doc(auth.currentUser.uid).delete(); document.getElementById('incoming-ui').classList.add('hidden'); }
+        async function sendMsg() { const text = document.getElementById('msg-input').value; if(!text && !fileData) return; const chatId = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid; await db.collection('chats').doc(chatId).collection('messages').add({ text: text || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById('msg-input').value = ''; fileData = null; }
+        function listenForMsg(friendId) { const chatId = auth.currentUser.uid < friendId ? auth.currentUser.uid + "_" + friendId : friendId + "_" + auth.currentUser.uid; db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => { const div = document.getElementById('messages'); div.innerHTML = ''; s.forEach(d => { const data = d.data(); const isMe = data.sender === auth.currentUser.uid; let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2">` : ''; div.innerHTML += `<div class="bubble ${isMe ? 'bubble-me' : 'bubble-them'}">${mediaHTML}${data.text}</div>`; }); div.scrollTop = div.scrollHeight; }); }
         function handleFile() { const file = document.getElementById('file-input').files[0]; const reader = new FileReader(); reader.onload = e => { fileData = e.target.result; sendMsg(); }; reader.readAsDataURL(file); }
     </script>
 </body>
