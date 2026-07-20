@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Soyel Pro - Fingerprint Lock</title>
+    <title>Soyel Pro Messenger</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -14,22 +14,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
         body { font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; background-image: url('bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-color: #0f172a; }
         .dark-overlay { background: rgba(0, 0, 0, 0.6); height: 100vh; width: 100%; display: flex; flex-direction: column; }
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 30px; }
-        
-        /* ফিঙ্গারপ্রিন্ট লক স্ক্রিন */
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; background-image: url('bg.jpg'); background-size: cover; }
-        .lock-content { background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .fingerprint-icon { font-size: 80px; color: #6366f1; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
+        .glass { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; }
         video { width: 100%; height: 100vh; object-fit: cover; background: #000; }
         #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 160px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; }
         .contact-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 22px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        #chat-window { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; flex-direction: column; background-image: url('bg.jpg'); background-size: cover; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.7); }
-        .bubble { padding: 12px 16px; border-radius: 22px; max-width: 80%; font-size: 14px; }
-        .bubble-me { background: #4f46e5; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .bubble-them { background: rgba(255,255,255,0.15); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+        
+        /* পিন লক স্ক্রিন */
+        #pin-screen { position: fixed; inset: 0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; background: #000; background-image: url('bg.jpg'); background-size: cover; }
+        .pin-input { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); width: 150px; text-align: center; padding: 15px; border-radius: 15px; color: white; font-size: 24px; letter-spacing: 10px; outline: none; margin-bottom: 20px; }
     </style>
 </head>
 <body onclick="startAudio()">
@@ -37,13 +29,14 @@
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
-    <!-- ফিঙ্গারপ্রিন্ট লক স্ক্রিন -->
-    <div id="lock-screen">
-        <div class="lock-content">
-            <span class="material-icons-round fingerprint-icon">fingerprint</span>
-            <h2 class="text-2xl font-bold mb-2">Soyel Pro Locked</h2>
-            <p class="text-white/50 mb-10 text-sm">অ্যাপটি খুলতে আপনার ফিঙ্গারপ্রিন্ট দিন</p>
-            <button onclick="verifyFingerprint()" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">আনলক করুন</button>
+    <!-- পিন লক স্ক্রিন -->
+    <div id="pin-screen">
+        <div class="h-full w-full flex flex-col items-center justify-center bg-black/70 backdrop-blur-xl text-white">
+            <span class="material-icons-round text-6xl text-indigo-500 mb-6">lock</span>
+            <h2 class="text-2xl font-bold mb-4">Soyel Pro Locked</h2>
+            <p class="text-white/50 mb-8">অ্যাপটি খুলতে ৪ অক্ষরের পিন দিন</p>
+            <input type="password" id="pin-field" maxlength="4" class="pin-input" placeholder="****">
+            <button onclick="checkPIN()" class="bg-indigo-600 px-10 py-3 rounded-full font-bold">আনলক</button>
         </div>
     </div>
 
@@ -58,18 +51,18 @@
         </div>
 
         <!-- ড্যাশবোর্ড -->
-        <div id="dashboard" class="hidden flex-1 flex flex-col p-6 overflow-hidden">
+        <div id="dashboard" class="hidden flex-1 flex flex-col p-6">
             <header class="flex justify-between items-center text-white mb-6">
                 <div class="flex items-center gap-3">
-                    <img id="my-photo" src="" class="w-10 h-10 rounded-full border-2 border-indigo-400">
+                    <img id="my-photo" src="" class="w-10 h-10 rounded-full">
                     <h2 id="my-name" class="font-bold text-lg">Soyel Khan</h2>
                 </div>
                 <button onclick="showIdModal()" class="bg-white/20 px-4 py-2 rounded-xl text-xs font-bold">ID</button>
             </header>
 
-            <div id="setup-lock-btn" class="hidden mb-6 bg-yellow-500/20 border border-yellow-500/50 p-4 rounded-2xl text-center">
-                <p class="text-yellow-500 text-[11px] font-bold mb-2">আপনার ফোন নিরাপদ করতে লক সেট করুন</p>
-                <button onclick="registerFingerprint()" class="bg-yellow-500 text-black px-6 py-2 rounded-full text-[10px] font-bold">লক চালু করুন</button>
+            <div id="set-lock-btn" class="hidden glass p-4 mb-6 text-center">
+                <p class="text-white/60 text-[10px] mb-2 font-bold uppercase">নিরাপত্তার জন্য পিন লক সেট করুন</p>
+                <button onclick="setupPIN()" class="bg-indigo-500 text-white px-6 py-2 rounded-full text-[10px] font-bold">পিন সেট করুন</button>
             </div>
 
             <div class="space-y-6 overflow-y-auto flex-1">
@@ -106,13 +99,13 @@
             <button onclick="document.getElementById('file-input').click()" class="text-white/50"><span class="material-icons-round">add_circle</span></button>
             <input id="msg-input" type="text" placeholder="লিখুন..." class="flex-1 p-4 bg-white/10 rounded-2xl text-white outline-none border border-white/5">
             <button onclick="sendMsg()" class="bg-indigo-600 text-white p-4 rounded-2xl"><span class="material-icons-round">send</span></button>
-            <input type="file" id="file-input" class="hidden" onchange="handleFile()">
+            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleFile()">
         </div>
     </div>
 
     <!-- ইনকামিং কল -->
     <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-indigo-900 flex flex-col items-center justify-center text-white text-center">
-        <div class="w-28 h-28 rounded-full bg-white/10 border-4 border-white/20 p-1 mb-6">
+        <div class="w-28 h-28 rounded-full bg-white/10 border-4 border-white/20 p-1 mb-6 animate-bounce">
             <img id="caller-img" src="" class="w-full h-full rounded-full object-cover">
         </div>
         <h2 id="caller-name" class="text-2xl font-bold">ভিডিও কল আসছে...</h2>
@@ -145,42 +138,23 @@
 
         function startAudio() { ringtone.play().then(()=>ringtone.pause()); dialtone.play().then(()=>dialtone.pause()); }
 
-        // --- ফিঙ্গারপ্রিন্ট লজিক ---
-        async function registerFingerprint() {
-            try {
-                const credential = await navigator.credentials.create({
-                    publicKey: {
-                        challenge: new Uint8Array([1,2,3,4]),
-                        rp: { name: "Soyel Pro" },
-                        user: { id: new Uint8Array([1]), name: "user", displayName: "User" },
-                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                        authenticatorSelection: { authenticatorAttachment: "platform" }
-                    }
-                });
-                if(credential) {
-                    localStorage.setItem('lock_enabled', 'true');
-                    alert("ফিঙ্গারপ্রিন্ট লক চালু হয়েছে!");
-                    document.getElementById('setup-lock-btn').style.display = 'none';
-                }
-            } catch(e) { alert("আপনার ফোনে ফিঙ্গারপ্রিন্ট সাপোর্ট করে না বা কোনো সমস্যা হয়েছে।"); }
+        // --- পিন লক লজিক ---
+        function setupPIN() {
+            const pin = prompt("৪ অক্ষরের একটি নতুন পিন দিন:");
+            if(pin && pin.length === 4) {
+                localStorage.setItem('app_pin', pin);
+                alert("পিন সেট করা হয়েছে!");
+                document.getElementById('set-lock-btn').style.display = 'none';
+            } else { alert("পিন অবশ্যই ৪ অক্ষরের হতে হবে।"); }
         }
 
-        async function verifyFingerprint() {
-            try {
-                const assertion = await navigator.credentials.get({
-                    publicKey: { challenge: new Uint8Array([1,2,3,4]), timeout: 60000 }
-                });
-                if(assertion) { document.getElementById('lock-screen').style.display = 'none'; }
-            } catch(e) { alert("ফিঙ্গারপ্রিন্ট মেলেনি। আবার চেষ্টা করুন।"); }
+        function checkPIN() {
+            const enteredPin = document.getElementById('pin-field').value;
+            const savedPin = localStorage.getItem('app_pin');
+            if(enteredPin === savedPin) {
+                document.getElementById('pin-screen').style.display = 'none';
+            } else { alert("ভুল পিন! আবার চেষ্টা করুন।"); document.getElementById('pin-field').value = ''; }
         }
-
-        function checkLock() {
-            if(localStorage.getItem('lock_enabled') === 'true') {
-                document.getElementById('lock-screen').style.display = 'flex';
-                verifyFingerprint();
-            }
-        }
-        // -----------------------
 
         auth.onAuthStateChanged(async user => {
             if (user) {
@@ -189,13 +163,16 @@
                 document.getElementById('my-id-display').innerText = user.uid;
                 document.getElementById('my-name').innerText = user.displayName;
                 document.getElementById('my-photo').src = user.photoURL;
-                
-                if(!localStorage.getItem('lock_enabled')) {
-                    document.getElementById('setup-lock-btn').classList.remove('hidden');
+
+                // যদি পিন সেট করা থাকে তবে লক স্ক্রিন দেখাও
+                if(localStorage.getItem('app_pin')) {
+                    document.getElementById('pin-screen').style.display = 'flex';
+                } else {
+                    document.getElementById('set-lock-btn').classList.remove('hidden');
                 }
-                
-                checkLock();
+
                 await db.collection('users').doc(user.uid).set({ name: user.displayName, photo: user.photoURL, uid: user.uid });
+                await db.collection('calls').doc(user.uid).delete();
                 listenForCalls(user.uid);
                 loadContacts(user.uid);
             }
@@ -209,6 +186,7 @@
             db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => {
                 const list = document.getElementById('contact-list');
                 list.innerHTML = '';
+                if(snap.empty) list.innerHTML = '<p class="text-white/20 text-center py-10 text-xs italic">বন্ধুর আইডি যোগ করুন</p>';
                 snap.forEach(async doc => {
                     const friendUid = doc.id;
                     const friendData = (await db.collection('users').doc(friendUid).get()).data();
@@ -236,77 +214,4 @@
             currentChatId = id;
             document.getElementById('chat-user-name').innerText = name;
             document.getElementById('chat-user-img').src = photo;
-            document.getElementById('chat-window').style.display = 'flex';
-            listenForMsg(id);
-        }
-        function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-
-        async function sendMsg() {
-            const text = document.getElementById('msg-input').value;
-            if(!text && !fileData) return;
-            const chatId = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
-            await db.collection('chats').doc(chatId).collection('messages').add({
-                text: text || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            document.getElementById('msg-input').value = ''; fileData = null;
-        }
-
-        function listenForMsg(friendId) {
-            const chatId = auth.currentUser.uid < friendId ? auth.currentUser.uid + "_" + friendId : friendId + "_" + auth.currentUser.uid;
-            db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => {
-                const div = document.getElementById('messages'); div.innerHTML = '';
-                s.forEach(d => {
-                    const data = d.data(); const isMe = data.sender === auth.currentUser.uid;
-                    let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2">` : '';
-                    div.innerHTML += `<div class="bubble ${isMe ? 'bubble-me' : 'bubble-them'}">${mediaHTML}${data.text}</div>`;
-                });
-                div.scrollTop = div.scrollHeight;
-            });
-        }
-
-        async function startCallFromChat() {
-            dialtone.play();
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
-            document.getElementById('localVideo').srcObject = localStream;
-            const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON());
-            const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now() });
-            callDoc.onSnapshot(s => { if (s.data()?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)); } });
-            callDoc.collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
-        }
-
-        function listenForCalls(uid) {
-            db.collection('calls').doc(uid).onSnapshot(async s => {
-                const data = s.data();
-                if (data?.offer && !pc.currentRemoteDescription) {
-                    if(Date.now() - data.ts > 60000) return db.collection('calls').doc(uid).delete();
-                    currentChatId = uid;
-                    document.getElementById('caller-name').innerText = data.callerName;
-                    document.getElementById('caller-img').src = data.callerPhoto;
-                    ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden');
-                }
-            });
-        }
-
-        async function acceptCall() {
-            ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden');
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
-            document.getElementById('localVideo').srcObject = localStream;
-            const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('answerCandidates').add(e.candidate.toJSON());
-            const offer = (await callDoc.get()).data().offer;
-            await pc.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await pc.createAnswer(); await pc.setLocalDescription(answer);
-            await callDoc.update({ answer: { sdp: answer.sdp, type: answer.type } });
-            callDoc.collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
-        }
-
-        function handleFile() { const file = document.getElementById('file-input').files[0]; const reader = new FileReader(); reader.onload = e => { fileData = e.target.result; sendMsg(); }; reader.readAsDataURL(file); }
-    </script>
-</body>
-</html>
+            document.getElementById('chat-window').style.display = 'flex
