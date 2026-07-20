@@ -3,81 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Soyel Call Pro + SMS</title>
-    
-    <!-- অ্যাপের লোগো আইকন -->
+    <title>Soyel Call Pro - Ultra Stable</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
-        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; margin: 0; overflow: hidden; }
-        #remoteVideo { width: 100%; height: 100vh; object-fit: cover; background: #1e293b; }
-        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid white; object-fit: cover; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        
-        /* কন্ট্রোল বার */
+        body { font-family: 'Outfit', sans-serif; background-color: #f1f5f9; margin: 0; overflow: hidden; }
+        #remoteVideo { width: 100%; height: 100vh; object-fit: cover; background: #0f172a; }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 110px; height: 160px; border-radius: 20px; border: 2px solid white; object-fit: cover; z-index: 10; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; }
-        .btn { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 15px rgba(0,0,0,0.3); transition: 0.3s; }
-        
-        /* চ্যাট বক্স স্টাইল */
-        #chat-box { position: absolute; bottom: 100px; left: 20px; right: 20px; height: 250px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 20px; display: none; flex-direction: column; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
-        .msg { margin-bottom: 8px; padding: 8px 12px; border-radius: 12px; max-width: 80%; }
-        .msg-me { background: #4f46e5; color: white; align-self: flex-end; margin-left: auto; }
-        .msg-them { background: #e2e8f0; color: #1e293b; }
+        .btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 15px rgba(0,0,0,0.3); transition: 0.3s; }
+        .btn:active { transform: scale(0.9); }
+        #chat-box { position: absolute; bottom: 110px; left: 20px; right: 20px; height: 300px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 25px; display: none; flex-direction: column; z-index: 30; border: 1px solid rgba(255,255,255,0.3); }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 14px; }
+        .msg-me { background: #4f46e5; color: white; align-self: flex-end; }
+        .msg-them { background: #e2e8f0; color: #1e293b; align-self: flex-start; }
     </style>
 </head>
 <body>
 
+    <!-- অডিও ফাইল -->
+    <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
+    <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
+
     <!-- লগইন স্ক্রিন -->
-    <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center">
-        <div class="mb-6"><img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 shadow-2xl rounded-[2rem] border-4 border-white"></div>
-        <h1 class="text-4xl font-bold mb-2 text-indigo-600">Soyel Call Pro</h1>
-        <p class="text-gray-500 mb-10 font-bold uppercase tracking-widest text-xs">Video + SMS Messenger</p>
-        <button onclick="login()" class="w-full max-w-xs bg-indigo-600 text-white py-5 rounded-full font-bold shadow-lg">গুগল দিয়ে শুরু করুন</button>
-        <p class="mt-12 text-[10px] text-gray-400 font-bold">Developed by Soyel Khan</p>
+    <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center bg-white">
+        <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-28 h-28 mb-6 shadow-2xl rounded-[2.5rem]">
+        <h1 class="text-4xl font-bold text-indigo-600 mb-2">Soyel Call Pro</h1>
+        <p class="text-gray-400 mb-10 font-bold uppercase tracking-[0.2em] text-[10px]">Next-Gen Video Calling</p>
+        <button onclick="login()" class="bg-indigo-600 text-white px-12 py-5 rounded-full font-bold shadow-xl hover:bg-indigo-700 transition-all">গুগল দিয়ে শুরু করুন</button>
+        <p class="mt-12 text-[10px] text-gray-300 font-bold uppercase">Developed by Soyel Khan</p>
     </div>
 
     <!-- ড্যাশবোর্ড -->
-    <div id="dashboard" class="hidden h-screen flex flex-col bg-slate-50">
-        <header class="p-5 bg-white shadow-sm flex justify-between items-center">
-            <h2 class="font-bold text-xl text-indigo-600">Soyel Call</h2>
+    <div id="dashboard" class="hidden h-screen flex flex-col">
+        <header class="p-6 bg-white shadow-sm flex justify-between items-center border-b">
+            <h2 class="font-bold text-xl text-indigo-600">Soyel Call Pro</h2>
             <button onclick="location.reload()" class="text-gray-400"><span class="material-icons-round">logout</span></button>
         </header>
-        <main class="p-6">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm mb-8 border border-slate-100 text-center">
-                <p class="text-slate-400 text-[10px] font-bold mb-2 uppercase tracking-widest">আপনার আইডি</p>
-                <span id="my-id" class="font-mono font-bold text-indigo-600 break-all select-all text-sm">লোড হচ্ছে...</span>
+        <main class="p-6 flex-1 bg-slate-50">
+            <div class="bg-indigo-600 p-8 rounded-[2.5rem] shadow-lg mb-8 text-white relative overflow-hidden">
+                <p class="opacity-70 text-[10px] font-bold mb-1 uppercase tracking-widest">আপনার কলিং আইডি</p>
+                <h3 id="my-id" class="text-lg font-mono font-bold break-all">লোড হচ্ছে...</h3>
+                <span class="material-icons-round absolute -right-4 -bottom-4 text-9xl opacity-10">person</span>
             </div>
-            <input id="friend-id" type="text" placeholder="বন্ধুর আইডি দিন" class="w-full p-5 border rounded-2xl bg-white shadow-sm outline-none mb-4 border-none">
-            <button onclick="startCall()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-lg transition-all active:scale-95">ভিডিও কল দিন</button>
+            <div class="space-y-4">
+                <label class="text-xs font-bold text-slate-500 ml-2">বন্ধুকে কল দিন</label>
+                <input id="friend-id" type="text" placeholder="আইডি এখানে পেস্ট করুন" class="w-full p-6 rounded-3xl bg-white shadow-sm outline-none focus:ring-2 ring-indigo-500 border-none">
+                <button onclick="startCall()" class="w-full bg-indigo-600 text-white py-6 rounded-3xl font-bold shadow-xl shadow-indigo-200">ভিডিও কল শুরু</button>
+            </div>
         </main>
     </div>
 
-    <!-- ভিডিও কল স্ক্রিন -->
-    <div id="call-screen" class="hidden fixed inset-0 z-[100] bg-black flex flex-col">
+    <!-- কল স্ক্রিন -->
+    <div id="call-screen" class="hidden fixed inset-0 z-[100] bg-black">
         <video id="remoteVideo" autoplay playsinline></video>
         <video id="localVideo" autoplay playsinline muted></video>
-
-        <!-- চ্যাট বক্স (SMS) -->
+        
         <div id="chat-box">
-            <div id="messages" class="flex flex-col"></div>
+            <div id="messages"></div>
             <div class="p-3 border-t flex gap-2">
-                <input id="chat-input" type="text" placeholder="মেসেজ লিখুন..." class="flex-1 p-2 border rounded-full outline-none px-4">
-                <button onclick="sendSMS()" class="bg-indigo-600 text-white p-2 rounded-full px-4 font-bold">পাঠান</button>
+                <input id="chat-input" type="text" placeholder="SMS লিখুন..." class="flex-1 p-3 border rounded-full px-5 outline-none text-sm">
+                <button onclick="sendSMS()" class="bg-indigo-600 text-white px-5 rounded-full font-bold uppercase text-xs">পাঠান</button>
             </div>
         </div>
 
-        <!-- কন্ট্রোলস -->
         <div class="controls">
-            <button onclick="toggleChat()" class="btn bg-indigo-500"><span class="material-icons-round">chat</span></button>
-            <button onclick="location.reload()" class="btn bg-red-500"><span class="material-icons-round text-3xl">call_end</span></button>
+            <button onclick="toggleChat()" class="btn bg-white/20 backdrop-blur-md"><span class="material-icons-round">chat</span></button>
+            <button onclick="hangUp()" class="btn bg-red-500 shadow-red-500/50"><span class="material-icons-round text-3xl">call_end</span></button>
+            <button onclick="toggleCam()" id="cam-btn" class="btn bg-white/20 backdrop-blur-md"><span class="material-icons-round">videocam</span></button>
         </div>
     </div>
 
@@ -90,12 +89,24 @@
             messagingSenderId: "1016513647050",
             appId: "1:1016513647050:web:c089c4da5f6c00eb53bf33"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
         
-        let localStream, currentCallId;
+        let pc = new RTCPeerConnection({
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ],
+            iceCandidatePoolSize: 10,
+        });
+
+        let localStream = null;
+        let remoteStream = null;
+        let activeCallId = null;
+
+        const ringtone = document.getElementById('ringtone');
+        const dialtone = document.getElementById('dialtone');
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -108,56 +119,86 @@
 
         async function login() { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
+        function stopTones() {
+            ringtone.pause(); ringtone.currentTime = 0;
+            dialtone.pause(); dialtone.currentTime = 0;
+        }
+
         async function setupMedia() {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            remoteStream = new MediaStream();
             localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
+            pc.ontrack = e => e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
             document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('remoteVideo').srcObject = remoteStream;
         }
 
         async function startCall() {
             const friendId = document.getElementById('friend-id').value;
-            if(!friendId) return alert("বন্ধুর আইডি দিন");
-            currentCallId = friendId;
+            if(!friendId) return alert("আইডি দিন");
+            activeCallId = friendId;
+            
+            dialtone.play();
             await setupMedia();
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('call-screen').classList.remove('hidden');
-            
-            const callDoc = db.collection('calls').doc(friendId);
-            listenForSMS(friendId);
 
-            pc.onicecandidate = e => e.candidate && callDoc.collection('offerCandidates').add(e.candidate.toJSON());
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type } });
-            
-            callDoc.onSnapshot(s => s.data()?.answer && pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)));
-            callDoc.collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+            const callDoc = db.collection('calls').doc(friendId);
+            const offerCandidates = callDoc.collection('offerCandidates');
+            const answerCandidates = callDoc.collection('answerCandidates');
+
+            pc.onicecandidate = e => e.candidate && offerCandidates.add(e.candidate.toJSON());
+
+            const offerDescription = await pc.createOffer();
+            await pc.setLocalDescription(offerDescription);
+            await callDoc.set({ offer: { sdp: offerDescription.sdp, type: offerDescription.type } });
+
+            callDoc.onSnapshot(s => {
+                const data = s.data();
+                if (!pc.currentRemoteDescription && data?.answer) {
+                    stopTones();
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    document.getElementById('dashboard').classList.add('hidden');
+                    document.getElementById('call-screen').classList.remove('hidden');
+                }
+            });
+
+            answerCandidates.onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+            listenForSMS(friendId);
         }
 
         function listenForCalls(uid) {
             db.collection('calls').doc(uid).onSnapshot(async s => {
-                if (s.data()?.offer && !pc.currentRemoteDescription) {
-                    if (confirm("ভিডিও কল আসছে! রিসিভ করবেন?")) {
-                        currentCallId = uid;
+                const data = s.data();
+                if (data?.offer && !pc.currentRemoteDescription) {
+                    ringtone.play();
+                    if (confirm("সোয়েল কল প্রো: ভিডিও কল আসছে! রিসিভ করবেন?")) {
+                        stopTones();
+                        activeCallId = uid;
                         await setupMedia();
+                        
+                        const callDoc = db.collection('calls').doc(uid);
+                        const answerCandidates = callDoc.collection('answerCandidates');
+                        const offerCandidates = callDoc.collection('offerCandidates');
+
+                        pc.onicecandidate = e => e.candidate && answerCandidates.add(e.candidate.toJSON());
+                        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                        
+                        const answerDescription = await pc.createAnswer();
+                        await pc.setLocalDescription(answerDescription);
+                        await callDoc.update({ answer: { sdp: answerDescription.sdp, type: answerDescription.type } });
+
+                        offerCandidates.onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+                        
                         document.getElementById('dashboard').classList.add('hidden');
                         document.getElementById('call-screen').classList.remove('hidden');
                         listenForSMS(uid);
-                        
-                        const callDoc = db.collection('calls').doc(uid);
-                        pc.onicecandidate = e => e.candidate && callDoc.collection('answerCandidates').add(e.candidate.toJSON());
-                        await pc.setRemoteDescription(new RTCSessionDescription(s.data().offer));
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-                        await callDoc.update({ answer: { sdp: answer.sdp, type: answer.type } });
-                        callDoc.collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type === 'added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
+                    } else {
+                        stopTones();
+                        db.collection('calls').doc(uid).delete();
                     }
                 }
             });
         }
 
-        // SMS / Chat লজিক
         function toggleChat() {
             const box = document.getElementById('chat-box');
             box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
@@ -165,28 +206,35 @@
 
         async function sendSMS() {
             const text = document.getElementById('chat-input').value;
-            if(!text || !currentCallId) return;
-            
-            await db.collection('calls').doc(currentCallId).collection('messages').add({
-                text: text,
-                sender: auth.currentUser.uid,
-                time: firebase.firestore.FieldValue.serverTimestamp()
+            if(!text || !activeCallId) return;
+            await db.collection('calls').doc(activeCallId).collection('messages').add({
+                text, sender: auth.currentUser.uid, time: firebase.firestore.FieldValue.serverTimestamp()
             });
             document.getElementById('chat-input').value = '';
         }
 
         function listenForSMS(callId) {
-            db.collection('calls').doc(callId).collection('messages').orderBy('time')
-            .onSnapshot(snapshot => {
-                const msgDiv = document.getElementById('messages');
-                msgDiv.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+            db.collection('calls').doc(callId).collection('messages').orderBy('time').onSnapshot(s => {
+                const div = document.getElementById('messages');
+                div.innerHTML = '';
+                s.forEach(d => {
+                    const data = d.data();
                     const isMe = data.sender === auth.currentUser.uid;
-                    msgDiv.innerHTML += `<div class="msg ${isMe ? 'msg-me' : 'msg-them'}">${data.text}</div>`;
+                    div.innerHTML += `<div class="msg ${isMe ? 'msg-me' : 'msg-them'}">${data.text}</div>`;
                 });
-                msgDiv.scrollTop = msgDiv.scrollHeight;
+                div.scrollTop = div.scrollHeight;
             });
+        }
+
+        function hangUp() {
+            if(activeCallId) db.collection('calls').doc(activeCallId).delete();
+            location.reload();
+        }
+
+        function toggleCam() {
+            const enabled = localStream.getVideoTracks()[0].enabled;
+            localStream.getVideoTracks()[0].enabled = !enabled;
+            document.getElementById('cam-btn').innerHTML = `<span class="material-icons-round">${enabled ? 'videocam_off' : 'videocam'}</span>`;
         }
     </script>
 </body>
