@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Soyel Call Pro - Sound Fix</title>
+    <title>Soyel Call Pro</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -19,46 +19,68 @@
         #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 140px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .btn-round { width: 75px; height: 75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .ui-overlay { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; padding: 20px; text-align: center; background-image: url('bg.jpg'); background-size: cover; background-position: center; }
+
+        /* গোল সাউন্ড বাটন অ্যানিমেশন */
+        .pulse-btn {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #ef4444; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; z-index: 1000;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .pulse-btn.active { background: #22c55e; animation: none; }
     </style>
 </head>
-<body onclick="setupAudio()"> <!-- স্ক্রিনে টাচ করলেই সাউন্ড সিস্টেম রেডি হবে -->
+<body onclick="setupAudio()">
 
-    <!-- অডিও রিংটোন -->
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
     <div class="dark-overlay">
         
+        <!-- লগইন স্ক্রিন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="glass p-10 flex flex-col items-center">
-                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-20 h-20 mb-6">
-                <h1 class="text-3xl font-bold text-white mb-2 uppercase">Soyel Call Pro</h1>
+                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-20 h-20 mb-6 shadow-xl">
+                <h1 class="text-3xl font-bold text-white mb-2 uppercase italic">Soyel Call Pro</h1>
                 <button onclick="login()" class="bg-white text-indigo-600 px-10 py-4 rounded-full font-bold shadow-xl mt-8">গুগল দিয়ে শুরু</button>
             </div>
-            <p class="mt-12 text-[10px] text-white/50 font-bold uppercase">Developed by Soyel Khan</p>
         </div>
 
+        <!-- ড্যাশবোর্ড -->
         <div id="dashboard" class="hidden h-screen flex flex-col">
-            <header class="p-6 flex justify-between items-center text-white">
-                <h2 class="font-bold text-xl uppercase italic">Soyel Call</h2>
-                <button onclick="location.reload()" class="opacity-50"><span class="material-icons-round">logout</span></button>
-            </header>
-            <div class="p-8 flex-1 flex flex-col justify-center text-center">
-                <p class="text-white bg-red-500/50 p-2 rounded-lg text-[10px] mb-4 font-bold">সাউন্ড অন করতে স্ক্রিনের যেকোনো জায়গায় একবার টাচ করুন</p>
-                <div class="glass p-8 mb-8">
+            <header class="p-6 flex justify-between items-center text-white font-bold">Soyel Call Pro</header>
+            
+            <div class="p-8 flex-1 flex flex-col items-center justify-center text-center">
+                
+                <!-- নতুন গোল সাউন্ড বাটন -->
+                <div id="sound-unblocker" onclick="setupAudio()" class="pulse-btn mb-6">
+                    <span id="sound-icon" class="material-icons-round text-3xl">volume_off</span>
+                    <span id="sound-text" class="text-[9px] font-bold uppercase">সাউন্ড অন</span>
+                </div>
+
+                <div class="glass p-8 mb-8 w-full">
                     <p class="text-white/60 text-[10px] font-bold mb-2 uppercase">আপনার কলিং আইডি</p>
                     <p id="my-id" class="text-white font-mono font-bold break-all text-sm">লোড হচ্ছে...</p>
                 </div>
-                <div class="space-y-4">
-                    <input id="friend-id" type="text" placeholder="বন্ধুর আইডি এখানে দিন" class="w-full p-5 glass text-white placeholder-white/50 outline-none border-none">
-                    <button onclick="startCall()" class="w-full bg-white text-indigo-600 py-6 rounded-[30px] font-bold shadow-2xl text-lg">কল শুরু করুন</button>
+
+                <div class="space-y-4 w-full">
+                    <input id="friend-id" type="text" placeholder="বন্ধুর আইডি দিন" class="w-full p-5 glass text-white placeholder-white/50 outline-none border-none">
+                    <button onclick="startCall()" class="w-full bg-white text-indigo-600 py-6 rounded-[30px] font-bold shadow-2xl text-lg active:scale-95 transition-all">কল শুরু করুন</button>
                 </div>
+                <p class="mt-10 text-[10px] text-white/30 font-bold uppercase">Developed by Soyel Khan</p>
             </div>
         </div>
 
     </div>
 
-    <!-- ইনকামিং কল উইন্ডো -->
+    <!-- কল আসার স্ক্রিন -->
     <div id="incoming-ui" class="hidden ui-overlay">
         <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
             <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
@@ -66,23 +88,24 @@
             </div>
             <h2 class="text-3xl font-bold text-white mb-12">ভিডিও কল আসছে...</h2>
             <div class="flex gap-10">
-                <button onclick="acceptCall()" class="btn-round bg-green-500"><span class="material-icons-round text-3xl">videocam</span></button>
-                <button onclick="location.reload()" class="btn-round bg-red-500"><span class="material-icons-round text-3xl">call_end</span></button>
+                <button onclick="acceptCall()" class="btn-round bg-green-500 shadow-lg"><span class="material-icons-round text-3xl">videocam</span></button>
+                <button onclick="location.reload()" class="btn-round bg-red-500 shadow-lg"><span class="material-icons-round text-3xl">call_end</span></button>
             </div>
         </div>
     </div>
 
-    <!-- কল যাওয়ার উইন্ডো -->
+    <!-- কল যাওয়ার স্ক্রিন -->
     <div id="calling-ui" class="hidden ui-overlay">
         <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
             <div class="w-24 h-24 bg-indigo-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
                 <span class="material-icons-round text-5xl text-white">call_made</span>
             </div>
             <h2 class="text-2xl font-bold text-white mb-2">কল যাচ্ছে...</h2>
-            <button onclick="location.reload()" class="btn-round bg-red-500 mt-10"><span class="material-icons-round text-3xl">close</span></button>
+            <button onclick="location.reload()" class="btn-round bg-red-500 mt-10 shadow-lg"><span class="material-icons-round text-3xl">close</span></button>
         </div>
     </div>
 
+    <!-- ভিডিও পেজ -->
     <div id="video-page" class="hidden fixed inset-0 bg-black z-[200]">
         <video id="remoteVideo" autoplay playsinline></video>
         <video id="localVideo" autoplay playsinline muted></video>
@@ -108,10 +131,21 @@
         const ringtone = document.getElementById('ringtone');
         const dialtone = document.getElementById('dialtone');
 
-        // অডিও চালু করার জন্য বিশেষ ফাংশন
         function setupAudio() {
-            ringtone.play().then(() => { ringtone.pause(); }).catch(()=>{});
-            dialtone.play().then(() => { dialtone.pause(); }).catch(()=>{});
+            const btn = document.getElementById('sound-unblocker');
+            const icon = document.getElementById('sound-icon');
+            const text = document.getElementById('sound-text');
+            
+            ringtone.play().then(() => {
+                ringtone.pause();
+                dialtone.play().then(() => dialtone.pause());
+                
+                // বাটন সবুজ হবে এবং হারাবে
+                btn.classList.add('active');
+                icon.innerText = "volume_up";
+                text.innerText = "সচল হয়েছে";
+                setTimeout(() => { btn.style.display = 'none'; }, 1000);
+            }).catch(()=>{});
         }
 
         auth.onAuthStateChanged(user => {
@@ -131,18 +165,15 @@
             callId = fId;
             document.getElementById('calling-ui').classList.remove('hidden');
             dialtone.play();
-
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
             pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
             document.getElementById('localVideo').srcObject = localStream;
-
             const callDoc = db.collection('calls').doc(fId);
             pc.onicecandidate = e => e.candidate && callDoc.collection('offerCandidates').add(e.candidate.toJSON());
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
             await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type } });
-
             callDoc.onSnapshot(s => {
                 if (s.data()?.answer && !pc.currentRemoteDescription) {
                     dialtone.pause();
@@ -158,7 +189,7 @@
             db.collection('calls').doc(uid).onSnapshot(async s => {
                 if (s.data()?.offer && !pc.currentRemoteDescription) {
                     callId = uid;
-                    ringtone.play().catch(() => { console.log("সাউন্ড ইউজার টাচ ছাড়া বাজবে না"); });
+                    ringtone.play().catch(e => console.log("Sound locked"));
                     document.getElementById('incoming-ui').classList.remove('hidden');
                 }
             });
