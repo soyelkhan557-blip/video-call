@@ -13,10 +13,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
         body { font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; background-image: url('bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-color: #0f172a; }
-        .dark-overlay { background: rgba(0, 0, 0, 0.6); height: 100vh; width: 100%; display: flex; flex-direction: column; }
-        .glass { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; }
+        .dark-overlay { background: rgba(0, 0, 0, 0.65); height: 100vh; width: 100%; display: flex; flex-direction: column; }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px; }
         video { width: 100%; height: 100vh; object-fit: cover; background: #000; }
-        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 160px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 160px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .contact-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 22px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         #chat-window { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; background-image: url('bg.jpg'); background-size: cover; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.7); }
@@ -30,21 +30,20 @@
 </head>
 <body onclick="startAudio()">
 
-    <!-- অডিও -->
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
     <div class="dark-overlay">
-        <!-- লগইন -->
+        <!-- ১. লগইন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="glass p-12">
-                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 mb-6 mx-auto">
+                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 mb-6 mx-auto animate-pulse">
                 <h1 class="text-3xl font-bold text-white mb-8 italic">SOYEL PRO</h1>
                 <button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button>
             </div>
         </div>
 
-        <!-- ড্যাশবোর্ড -->
+        <!-- ২. ড্যাশবোর্ড -->
         <div id="dashboard" class="hidden flex-1 flex flex-col p-6 overflow-hidden">
             <header class="flex justify-between items-center text-white mb-10">
                 <div class="flex items-center gap-3">
@@ -56,7 +55,7 @@
 
             <div class="space-y-6 overflow-y-auto flex-1">
                 <div class="flex gap-2">
-                    <input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none focus:ring-1 ring-indigo-500">
+                    <input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none">
                     <button onclick="addNewContact()" class="bg-indigo-600 text-white px-5 rounded-2xl font-bold text-xs">যোগ</button>
                 </div>
                 <h3 class="text-white/40 text-[10px] font-bold uppercase tracking-widest ml-1">বন্ধুদের তালিকা</h3>
@@ -65,21 +64,21 @@
         </div>
     </div>
 
-    <!-- আইডি মডাল -->
+    <!-- ৩. আইডি মডাল -->
     <div id="id-modal" onclick="closeIdModal()">
         <div class="id-card" onclick="event.stopPropagation()">
             <p class="text-[10px] font-bold uppercase opacity-60 mb-2">আপনার কলিং আইডি</p>
-            <p id="my-id-display" class="font-mono text-xs break-all bg-black/30 p-4 rounded-xl border border-white/10 mb-6">লোড হচ্ছে...</p>
+            <p id="my-id-display" class="font-mono text-xs break-all bg-black/30 p-4 rounded-xl border border-white/10 mb-6 font-bold">লোড হচ্ছে...</p>
             <button onclick="copyMyID()" class="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold shadow-lg">আইডি কপি করুন</button>
             <button onclick="closeIdModal()" class="mt-6 text-[10px] uppercase font-bold opacity-40">বন্ধ করুন</button>
         </div>
     </div>
 
-    <!-- চ্যাট উইন্ডো -->
+    <!-- ৪. চ্যাট উইন্ডো -->
     <div id="chat-window">
-        <div class="p-5 bg-black/50 backdrop-blur-xl flex items-center gap-3 text-white border-b border-white/10">
+        <div class="p-5 bg-black/60 backdrop-blur-xl flex items-center gap-3 text-white border-b border-white/10">
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
-            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full border border-indigo-500">
+            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full">
             <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4></div>
             <button onclick="startCallFromChat()" class="p-2 bg-indigo-600 rounded-full shadow-lg"><span class="material-icons-round">videocam</span></button>
         </div>
@@ -92,7 +91,7 @@
         </div>
     </div>
 
-    <!-- ইনকামিং কল -->
+    <!-- ৫. ইনকামিং কল -->
     <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-indigo-900 flex flex-col items-center justify-center text-white text-center">
         <div class="w-28 h-28 rounded-full border-4 border-white/20 mb-6 animate-bounce">
             <img id="caller-img" src="" class="w-full h-full rounded-full object-cover">
@@ -100,11 +99,11 @@
         <h2 id="caller-name" class="text-2xl font-bold mb-10">ভিডিও কল আসছে...</h2>
         <div class="flex gap-12">
             <button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">videocam</span></button>
-            <button onclick="location.reload()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">call_end</span></button>
+            <button onclick="rejectCall()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">call_end</span></button>
         </div>
     </div>
 
-    <!-- ভিডিও স্ক্রিন -->
+    <!-- ৬. ভিডিও পেজ -->
     <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]">
         <video id="remoteVideo" autoplay playsinline></video>
         <video id="localVideo" autoplay playsinline muted></video>
@@ -113,7 +112,7 @@
         </div>
     </div>
 
-    <!-- আউটগোয়িং কল (Dialing) -->
+    <!-- ৭. কল ডায়ালিং পেজ -->
     <div id="calling-ui" class="hidden fixed inset-0 z-[3000] bg-black/80 flex flex-col items-center justify-center text-white">
         <div class="w-24 h-24 bg-indigo-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
             <span class="material-icons-round text-5xl">call_made</span>
@@ -146,14 +145,19 @@
                 document.getElementById('my-id-display').innerText = user.uid;
                 document.getElementById('my-name').innerText = user.displayName;
                 document.getElementById('my-photo').src = user.photoURL;
+                
+                // ১. নিজের প্রোফাইল আপডেট
                 await db.collection('users').doc(user.uid).set({ name: user.displayName, photo: user.photoURL, uid: user.uid });
+                
+                // ২. জরুরি: আগের সব পুরনো কল ডিলিট করা (অটো-কল ফিক্স)
+                await db.collection('calls').doc(user.uid).delete();
+                
                 listenForCalls(user.uid);
                 loadContacts(user.uid);
             }
         });
 
         async function login() { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-
         function showIdModal() { document.getElementById('id-modal').style.display = 'flex'; }
         function closeIdModal() { document.getElementById('id-modal').style.display = 'none'; }
         function copyMyID() { navigator.clipboard.writeText(document.getElementById('my-id-display').innerText); alert("আইডি কপি হয়েছে!"); closeIdModal(); }
@@ -161,6 +165,7 @@
         function loadContacts(myUid) {
             db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => {
                 const list = document.getElementById('contact-list'); list.innerHTML = '';
+                if(snap.empty) list.innerHTML = '<p class="text-white/20 text-center py-10 text-xs italic">বন্ধুর আইডি যোগ করুন</p>';
                 snap.forEach(async doc => {
                     const fUid = doc.id;
                     const fData = (await db.collection('users').doc(fUid).get()).data();
@@ -214,7 +219,7 @@
             pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON());
             const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
             await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now() });
-            callDoc.onSnapshot(s => { if (s.data()?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)); } });
+            callDoc.onSnapshot(s => { if (s.data()?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(s.data().answer)); } });
             callDoc.collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
         }
 
@@ -222,10 +227,13 @@
             db.collection('calls').doc(uid).onSnapshot(async s => {
                 const data = s.data();
                 if (data?.offer && !pc.currentRemoteDescription) {
-                    if(Date.now() - data.ts > 60000) return db.collection('calls').doc(uid).delete();
+                    // ৩. অত্যন্ত জরুরি: ১ মিনিটের পুরনো কল অফার ইগনোর করা (অটো-কল ফিক্স ২)
+                    if(Date.now() - data.ts > 60000) {
+                        return db.collection('calls').doc(uid).delete();
+                    }
                     currentChatId = uid;
-                    document.getElementById('caller-name').innerText = data.callerName;
-                    document.getElementById('caller-img').src = data.callerPhoto;
+                    document.getElementById('caller-name').innerText = data.callerName || "বন্ধুর কল";
+                    document.getElementById('caller-img').src = data.callerPhoto || "https://cdn-icons-png.flaticon.com/512/3649/3649460.png";
                     ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden');
                 }
             });
@@ -238,13 +246,15 @@
             pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0];
             document.getElementById('localVideo').srcObject = localStream;
             const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON());
+            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('answerCandidates').add(e.candidate.toJSON());
             const offer = (await callDoc.get()).data().offer;
             await pc.setRemoteDescription(new RTCSessionDescription(offer));
             const answer = await pc.createAnswer(); await pc.setLocalDescription(answer);
             await callDoc.update({ answer: { sdp: answer.sdp, type: answer.type } });
             callDoc.collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
         }
+
+        function rejectCall() { ringtone.pause(); db.collection('calls').doc(auth.currentUser.uid).delete(); document.getElementById('incoming-ui').classList.add('hidden'); }
         function handleFile() { const file = document.getElementById('file-input').files[0]; const reader = new FileReader(); reader.onload = e => { fileData = e.target.result; sendMsg(); }; reader.readAsDataURL(file); }
     </script>
 </body>
