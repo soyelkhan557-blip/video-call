@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Soyel Call Pro - Ultra</title>
+    <title>Soyel Call Pro - Ultra Stable</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -13,95 +13,88 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
         body { font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; background-image: url('bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-color: #1e293b; }
-        .dark-overlay { background: rgba(0, 0, 0, 0.5); height: 100vh; width: 100%; overflow-y: auto; }
-        .glass { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; }
+        .dark-overlay { background: rgba(0, 0, 0, 0.5); height: 100vh; width: 100%; position: relative; }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; }
         video { width: 100%; height: 100vh; object-fit: cover; background: #000; }
-        #localVideo { position: absolute; top: 20px; right: 20px; width: 110px; height: 160px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn-round { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; }
+        .btn-round { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
         .ui-overlay { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; background-image: url('bg.jpg'); background-size: cover; background-position: center; }
-        .pulse-btn { width: 65px; height: 65px; border-radius: 50%; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        /* হিস্টোরি লিস্ট স্টাইল */
-        .history-item { background: rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #4f46e5; }
+        
+        /* হিস্টোরি প্যানেল */
+        #history-panel { position: fixed; top: 80px; right: 20px; width: 250px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; padding: 15px; }
+        .history-item { background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 12px; margin-bottom: 5px; font-size: 10px; border-left: 3px solid #6366f1; }
     </style>
 </head>
-<body>
+<body onclick="enableAudio()">
 
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
     <div class="dark-overlay">
         
-        <!-- লগইন -->
+        <!-- লগইন স্ক্রিন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="glass p-10">
                 <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-20 h-20 mb-6 mx-auto">
-                <h1 class="text-3xl font-bold text-white mb-8 uppercase tracking-tighter">Soyel Call Pro</h1>
-                <button onclick="login()" class="bg-white text-indigo-600 px-10 py-4 rounded-full font-bold shadow-xl active:scale-95 transition-all">গুগল দিয়ে শুরু</button>
+                <h1 class="text-3xl font-bold text-white mb-6 uppercase tracking-tighter">Soyel Call Pro</h1>
+                <button onclick="login()" class="bg-indigo-600 text-white px-10 py-4 rounded-full font-bold shadow-xl active:scale-95 transition-all">গুগল দিয়ে শুরু</button>
             </div>
-            <p class="mt-12 text-[10px] text-white/50 font-bold uppercase tracking-widest">Developed by Soyel Khan</p>
         </div>
 
         <!-- ড্যাশবোর্ড -->
-        <div id="dashboard" class="hidden min-h-screen flex flex-col p-6">
-            <header class="flex justify-between items-center text-white mb-8">
-                <h2 class="font-bold text-2xl tracking-tighter">Soyel Call <span class="text-indigo-400">Pro</span></h2>
-                <button onclick="location.reload()" class="opacity-50"><span class="material-icons-round text-3xl">logout</span></button>
+        <div id="dashboard" class="hidden h-screen flex flex-col">
+            <header class="p-6 flex justify-between items-center text-white">
+                <h2 class="font-bold text-xl uppercase italic">Soyel Call</h2>
+                <div class="flex gap-4">
+                    <button onclick="toggleHistory()" class="bg-white/20 p-2 rounded-full"><span class="material-icons-round">history</span></button>
+                    <button onclick="location.reload()" class="bg-white/20 p-2 rounded-full"><span class="material-icons-round">logout</span></button>
+                </div>
             </header>
+
+            <!-- হিস্টোরি বক্স (কোনার দিকে) -->
+            <div id="history-panel" class="glass">
+                <p class="text-[10px] font-bold mb-3 uppercase text-indigo-300">কল হিস্টোরি</p>
+                <div id="history-list" class="flex flex-col gap-2"></div>
+            </div>
             
-            <div class="flex flex-col items-center mb-8">
-                <div id="sound-btn" onclick="unlock()" class="pulse-btn mb-6 shadow-xl"><span class="material-icons-round text-3xl">volume_up</span></div>
-                <div class="glass p-6 w-full text-center mb-6">
-                    <p class="text-white/60 text-[10px] font-bold mb-1 uppercase">আপনার আইডি</p>
+            <div class="p-8 flex-1 flex flex-col items-center justify-center text-center">
+                <div class="glass p-8 mb-8 w-full">
+                    <p class="text-white/60 text-[10px] font-bold mb-2 uppercase">আপনার আইডি</p>
                     <p id="my-id" class="text-white font-mono font-bold break-all text-xs">লোড হচ্ছে...</p>
                 </div>
                 <div class="space-y-4 w-full">
-                    <input id="friend-id" type="text" placeholder="বন্ধুর আইডি দিন" class="w-full p-5 glass text-white placeholder-white/40 outline-none border-none focus:ring-2 ring-white/20">
-                    <button onclick="startCall()" class="w-full bg-white text-indigo-600 py-5 rounded-[25px] font-bold shadow-2xl text-lg active:scale-95 transition-all">কল শুরু করুন</button>
+                    <input id="friend-id" type="text" placeholder="বন্ধুর আইডি পেস্ট করুন" class="w-full p-5 glass text-white placeholder-white/40 outline-none border-none focus:ring-2 ring-white/30">
+                    <button onclick="startCall()" class="w-full bg-white text-indigo-600 py-5 rounded-[30px] font-bold shadow-2xl text-lg active:scale-95">কল শুরু করুন</button>
                 </div>
+                <p class="mt-20 text-[10px] text-white/30 font-bold uppercase tracking-widest">Version 5.0 • Soyel Khan</p>
             </div>
-
-            <!-- কল হিস্টোরি সেকশন -->
-            <div class="mt-4">
-                <h3 class="text-white text-sm font-bold mb-4 flex items-center gap-2">
-                    <span class="material-icons-round text-indigo-400">history</span> কল হিস্টোরি
-                </h3>
-                <div id="call-history-list" class="flex flex-col">
-                    <!-- হিস্টোরি এখানে আসবে -->
-                    <p class="text-white/30 text-center text-xs py-10">কোনো রেকর্ড পাওয়া যায়নি</p>
-                </div>
-            </div>
-            
-            <p class="mt-auto pt-10 text-center text-[9px] text-white/20 font-bold uppercase">Version 4.0 • Soyel Khan</p>
         </div>
     </div>
 
-    <!-- আউটগোয়িং কল UI -->
+    <!-- কল স্ক্রিন UI -->
     <div id="calling-ui" class="hidden ui-overlay">
         <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-            <div class="w-24 h-24 bg-indigo-500 rounded-full flex items-center justify-center mb-6 animate-pulse border-4 border-white/20">
+            <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 animate-pulse border border-white/30">
                 <span class="material-icons-round text-5xl text-white">call_made</span>
             </div>
             <h2 class="text-3xl font-bold text-white mb-2">কল যাচ্ছে...</h2>
-            <button onclick="location.reload()" class="btn-round bg-red-500 mt-20 shadow-lg shadow-red-500/40"><span class="material-icons-round text-3xl">close</span></button>
+            <button onclick="location.reload()" class="btn-round bg-red-500 mt-10 shadow-lg"><span class="material-icons-round text-3xl">close</span></button>
         </div>
     </div>
 
-    <!-- ইনকামিং কল UI -->
     <div id="incoming-ui" class="hidden ui-overlay">
-        <div class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
-            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce border-4 border-white/20">
+        <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
                 <span class="material-icons-round text-5xl text-white">call_received</span>
             </div>
             <h2 class="text-3xl font-bold text-white mb-12">ভিডিও কল আসছে...</h2>
             <div class="flex gap-10">
-                <button onclick="acceptCall()" class="btn-round bg-green-500 shadow-lg shadow-green-500/40"><span class="material-icons-round text-3xl">videocam</span></button>
-                <button onclick="location.reload()" class="btn-round bg-red-500 shadow-lg shadow-red-500/40"><span class="material-icons-round text-3xl">call_end</span></button>
+                <button onclick="acceptCall()" class="btn-round bg-green-500"><span class="material-icons-round text-3xl">videocam</span></button>
+                <button onclick="location.reload()" class="btn-round bg-red-500"><span class="material-icons-round text-3xl">call_end</span></button>
             </div>
         </div>
     </div>
 
-    <!-- ভিডিও স্ক্রিন -->
     <div id="video-page" class="hidden fixed inset-0 bg-black z-[200]">
         <video id="remoteVideo" autoplay playsinline></video>
         <video id="localVideo" autoplay playsinline muted></video>
@@ -122,15 +115,15 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        
         let pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
         let localStream, callId;
         const ringtone = document.getElementById('ringtone');
         const dialtone = document.getElementById('dialtone');
 
-        function unlock() {
+        function enableAudio() {
             ringtone.play().then(() => ringtone.pause());
             dialtone.play().then(() => dialtone.pause());
-            document.getElementById('sound-btn').style.display = 'none';
         }
 
         auth.onAuthStateChanged(user => {
@@ -139,45 +132,36 @@
                 document.getElementById('dashboard').classList.remove('hidden');
                 document.getElementById('my-id').innerText = user.uid;
                 listenForCalls(user.uid);
-                loadHistory(user.uid);
+                loadLogs(user.uid);
             }
         });
 
         async function login() { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
-        // হিস্টোরি সেভ করার ফাংশন
-        async function saveCallLog(caller, receiver, type) {
-            await db.collection('callLogs').add({
-                caller: caller,
-                receiver: receiver,
-                type: type, // 'outgoing' or 'incoming'
-                time: new Date().toLocaleString('bn-BD'),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        function toggleHistory() {
+            const p = document.getElementById('history-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function saveLog(cId, type) {
+            await db.collection('logs').add({
+                uid: auth.currentUser.uid,
+                target: cId,
+                type: type,
+                time: new Date().toLocaleTimeString(),
+                ts: firebase.firestore.FieldValue.serverTimestamp()
             });
         }
 
-        // হিস্টোরি লোড করার ফাংশন
-        function loadHistory(uid) {
-            db.collection('callLogs')
-                .where('caller', '==', uid)
-                .orderBy('timestamp', 'desc')
-                .limit(5)
-                .onSnapshot(snap => {
-                    const list = document.getElementById('call-history-list');
-                    list.innerHTML = '';
-                    if(snap.empty) list.innerHTML = '<p class="text-white/30 text-center text-xs py-10">কোনো রেকর্ড পাওয়া যায়নি</p>';
-                    snap.forEach(doc => {
-                        const data = doc.data();
-                        list.innerHTML += `
-                            <div class="history-item">
-                                <div>
-                                    <p class="text-white text-[11px] font-bold">ID: ${data.receiver.substring(0,10)}...</p>
-                                    <p class="text-white/40 text-[9px]">${data.time}</p>
-                                </div>
-                                <span class="material-icons-round text-indigo-400 text-sm">call_made</span>
-                            </div>`;
-                    });
+        function loadLogs(uid) {
+            db.collection('logs').where('uid', '==', uid).orderBy('ts', 'desc').limit(5).onSnapshot(s => {
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
+                s.forEach(d => {
+                    const data = d.data();
+                    list.innerHTML += `<div class="history-item text-white"><b>${data.type}:</b> ${data.target.substring(0,8)}... <br> <span class="opacity-50">${data.time}</span></div>`;
                 });
+            });
         }
 
         async function startCall() {
@@ -186,8 +170,7 @@
             callId = fId;
             dialtone.play();
             document.getElementById('calling-ui').classList.remove('hidden');
-
-            saveCallLog(auth.currentUser.uid, fId, 'outgoing');
+            saveLog(fId, 'কল করা হয়েছে');
 
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
@@ -217,6 +200,7 @@
                     callId = uid;
                     ringtone.play();
                     document.getElementById('incoming-ui').classList.remove('hidden');
+                    saveLog(uid, 'কল এসেছে');
                 }
             });
         }
