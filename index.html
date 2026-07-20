@@ -26,20 +26,22 @@
         .bubble-them { background: #1f2c33; align-self: flex-start; border-bottom-left-radius: 4px; }
         .media-msg { width: 100%; border-radius: 15px; margin-bottom: 5px; max-height: 250px; object-fit: cover; }
 
+        /* ভয়েস প্লেয়ার (WhatsApp Style) */
         .voice-container { display: flex; align-items: center; gap: 10px; min-width: 180px; }
         .play-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; items: center; justify-content: center; cursor: pointer; }
         .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; position: relative; }
         .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #34d399; width: 0%; transition: width 0.1s linear; }
 
+        /* ইনপুট বার ও রেকর্ডিং ইউআই */
         .input-bar { padding: 10px 10px 35px 10px; background: #0b141a; border-top: 1px solid rgba(255,255,255,0.05); }
         .input-container { display: flex; align-items: center; gap: 8px; position: relative; }
         .text-input-field { flex: 1; background: #1f2c33; border-radius: 30px; display: flex; align-items: center; padding: 0 10px; }
         input#msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 5px; font-size: 15px; }
         .recording-ui { position: absolute; inset: 0; background: #0b141a; display: none; align-items: center; border-radius: 30px; z-index: 10; padding-right: 5px; }
-        .rec-timer { color: white; font-size: 15px; margin-left: 45px; font-weight: bold; }
         .slide-cancel { color: #8696a0; font-size: 11px; margin-left: auto; animation: slideLeft 1.5s infinite; }
         @keyframes slideLeft { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(-15px); opacity: 0; } }
 
+        /* ডিলিট মেনু (NO REFRESH) */
         #delete-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #1f2c33; border-radius: 30px 30px 0 0; padding: 25px 20px; z-index: 5000; display: none; transition: 0.3s; transform: translateY(100%); border-top: 1px solid rgba(255,255,255,0.1); }
         #delete-menu.show { display: block; transform: translateY(0); }
         .menu-btn { width: 100%; padding: 16px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
@@ -52,23 +54,23 @@
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
     <div class="dark-overlay">
+        <!-- ১. লগইন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="glass p-12"><h1 class="text-3xl font-bold text-white mb-8 uppercase italic tracking-tighter">Soyel Pro</h1><button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button></div>
             <p class="mt-12 text-[10px] text-white/40 font-bold uppercase">Developed by Soyel Khan</p>
         </div>
 
+        <!-- ২. ড্যাশবোর্ড -->
         <div id="dashboard" class="hidden flex-1 flex flex-col p-6 overflow-hidden">
             <header class="flex justify-between items-center text-white mb-10"><img id="my-photo" src="" class="w-11 h-11 rounded-full border-2 border-indigo-400"><button onclick="showIdModal()" class="bg-[#4f46e5] px-5 py-2 rounded-xl text-xs font-bold shadow-lg">MY ID</button></header>
             <div class="space-y-6 flex-1 overflow-y-auto pb-20">
-                <div class="flex gap-2">
-                    <input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none focus:ring-1 ring-indigo-500">
-                    <button onclick="addNewContact()" class="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-xs shadow-lg active:scale-90">যোগ</button>
-                </div>
+                <div class="flex gap-2"><input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none focus:ring-1 ring-indigo-500"><button onclick="addNewContact()" class="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-xs shadow-lg active:scale-90">যোগ</button></div>
                 <div id="contact-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- ৩. চ্যাট উইন্ডো -->
     <div id="chat-window">
         <div class="p-4 bg-[#0b141a] flex items-center gap-3 text-white border-b border-white/5">
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
@@ -84,10 +86,11 @@
                     <button onclick="openVideoRecorder()" class="text-[#8696a0] pr-2"><span class="material-icons-round">videocam</span></button>
                     <input id="msg-input" type="text" placeholder="মেসেজ লিখুন..." autocomplete="off">
                 </div>
+                <!-- ভয়েস রেকর্ড ইন্ডিকেটর (ফিক্স করা সেন্ড বাটনসহ) -->
                 <div id="recording-overlay" class="recording-ui">
                     <span class="material-icons-round text-red-500 animate-pulse pl-4">mic</span><span id="rec-timer" class="text-white font-bold ml-10">0:00</span>
                     <span class="slide-cancel">বাতিল করতে টানুন <span class="material-icons-round text-sm">chevron_left</span></span>
-                    <button id="v-send-btn" onclick="stopVoiceRecord(true)" class="bg-[#00a884] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg ml-auto mr-2 active:scale-90"><span class="material-icons-round">send</span></button>
+                    <button id="v-send-btn" onclick="stopVoiceRecord(true)" class="bg-[#00a884] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg ml-2 active:scale-90"><span class="material-icons-round">send</span></button>
                 </div>
                 <button id="record-btn" onclick="startVoiceRecord()" class="bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg ml-2"><span class="material-icons-round">mic</span></button>
                 <button id="send-btn" onclick="sendMsg()" class="hidden bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg ml-2"><span class="material-icons-round">send</span></button>
@@ -96,6 +99,7 @@
         </div>
     </div>
 
+    <!-- ৪. ভিডিও রেকর্ডার -->
     <div id="video-record-ui">
         <video id="record-preview" autoplay muted playsinline></video>
         <div class="flex p-10 items-center justify-center gap-10 bg-black">
@@ -105,12 +109,14 @@
         </div>
     </div>
 
+    <!-- ৫. ডিলিট মেনু -->
     <div id="delete-menu">
         <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-        <button onclick="deleteNow()" class="menu-btn bg-red-500/20 text-red-500">সবার জন্য ডিলিট করুন</button>
+        <button onclick="deleteNow()" class="menu-btn bg-red-500/20 text-red-500"><span class="material-icons-round">delete</span> সবার জন্য ডিলিট করুন</button>
         <button onclick="closeDeleteMenu()" class="menu-btn bg-white/5 text-white">বাতিল করুন</button>
     </div>
 
+    <!-- ইনকামিং ও আউটগোয়িং কল UI -->
     <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-[#0b141a] flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-green-500 mb-8 overflow-hidden shadow-2xl"><img id="caller-img" src="" class="w-full h-full object-cover"></div><h2 id="caller-name" class="text-2xl font-bold mb-12">ইনকামিং কল...</h2><div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">videocam</span></button><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
     <div id="calling-ui" class="hidden fixed inset-0 z-[3000] bg-black/90 flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-indigo-500 mb-8 overflow-hidden animate-pulse shadow-2xl"><img id="target-img-call" src="" class="w-full h-full object-cover"></div><h2 id="target-name-call" class="text-2xl font-bold mb-12">কল হচ্ছে...</h2><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round text-4xl text-white">call_end</span></button></div>
     <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div class="absolute bottom-12 left-0 right-0 flex justify-center"><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/10"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
@@ -129,42 +135,108 @@
         function showIdModal() { document.getElementById('id-modal').classList.remove('hidden'); }
         function loadContacts(myUid) { db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => { const list = document.getElementById('contact-list'); list.innerHTML = ''; snap.forEach(async doc => { const fDoc = await db.collection('users').doc(doc.id).get(); const fData = fDoc.data(); if(fData) { const item = document.createElement('div'); item.className = "contact-item bg-white/5 p-4 rounded-2xl mb-3 flex items-center gap-3"; item.innerHTML = `<img src="${fData.photo}" class="w-12 h-12 rounded-full border border-indigo-500 shadow-lg"><div class="flex-1 text-white font-bold text-sm">${fData.name}</div><span class="material-icons-round text-[#00a884]">chevron_right</span>`; item.onclick = () => openChat(fData.uid, fData.name, fData.photo); list.appendChild(item); } }); }); }
         
-        /* আপনার স্পেশাল রিকোয়েস্ট: আইডি দিলেই সরাসরি চ্যাটে প্রবেশ */
-        async function addNewContact() { 
-            const id = document.getElementById('target-id').value.trim(); 
-            if(!id || id === auth.currentUser.uid) return alert("সঠিক আইডি দিন"); 
-            await db.collection('users').doc(auth.currentUser.uid).collection('contacts').doc(id).set({ added: true }); 
-            await db.collection('users').doc(id).collection('contacts').doc(auth.currentUser.uid).set({ added: true }); 
-            document.getElementById('target-id').value = ''; 
-            const fDoc = await db.collection('users').doc(id).get(); 
-            const fData = fDoc.data(); 
-            if(fData) openChat(id, fData.name, fData.photo);
-            else openChat(id, "নতুন বন্ধু", "https://cdn-icons-png.flaticon.com/512/3649/3649460.png");
-        }
-
+        async function addNewContact() { const id = document.getElementById('target-id').value.trim(); if(!id || id === auth.currentUser.uid) return alert("সঠিক আইডি দিন"); await db.collection('users').doc(auth.currentUser.uid).collection('contacts').doc(id).set({ added: true }); await db.collection('users').doc(id).collection('contacts').doc(auth.currentUser.uid).set({ added: true }); document.getElementById('target-id').value = ''; const fDoc = await db.collection('users').doc(id).get(); const fData = fDoc.data(); if(fData) openChat(id, fData.name, fData.photo); else openChat(id, "নতুন বন্ধু", "https://cdn-icons-png.flaticon.com/512/3649/3649460.png"); }
         function openChat(id, name, photo) { currentChatId = id; document.getElementById('chat-user-name').innerText = name; document.getElementById('chat-user-img').src = photo; document.getElementById('chat-window').style.display = 'flex'; listenForMsg(id); const chatId = getChatId(id); db.collection('chats').doc(chatId).collection('messages').where('sender', '==', id).get().then(s => s.forEach(d => d.ref.update({seen: true}))); }
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
         function getChatId(fId) { return auth.currentUser.uid < fId ? auth.currentUser.uid + "_" + fId : fId + "_" + auth.currentUser.uid; }
         function closeDeleteMenu() { document.getElementById('delete-menu').classList.remove('show'); selectedMsgId = null; }
         async function deleteNow() { if(!selectedMsgId) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').doc(selectedMsgId).delete(); closeDeleteMenu(); }
-        function toggleAudio(msgId, url) { if (!audioInstances[msgId]) { audioInstances[msgId] = new Audio(url); audioInstances[msgId].ontimeupdate = () => { const f = document.getElementById('fill-' + msgId); if(f) f.style.width = (audioInstances[msgId].currentTime / audioInstances[msgId].duration) * 100 + "%"; }; audioInstances[msgId].onended = () => { document.getElementById('icon-' + msgId).innerText = "play_arrow"; }; } const a = audioInstances[msgId]; if (a.paused) { a.play(); document.getElementById('icon-' + msgId).innerText = "pause"; } else { a.pause(); document.getElementById('icon-' + msgId).innerText = "play_arrow"; } }
+
+        /* ভয়েস প্লেয়ার লজিক */
+        function toggleAudio(msgId, url) {
+            if (!audioInstances[msgId]) {
+                audioInstances[msgId] = new Audio(url);
+                audioInstances[msgId].ontimeupdate = () => { const f = document.getElementById('fill-' + msgId); if(f) f.style.width = (audioInstances[msgId].currentTime / audioInstances[msgId].duration) * 100 + "%"; };
+                audioInstances[msgId].onended = () => { document.getElementById('icon-' + msgId).innerText = "play_arrow"; };
+            }
+            const a = audioInstances[msgId];
+            if (a.paused) { a.play(); document.getElementById('icon-' + msgId).innerText = "pause"; }
+            else { a.pause(); document.getElementById('icon-' + msgId).innerText = "play_arrow"; }
+        }
+
         let pressTimer; function handlePressStart(msgId) { pressTimer = setTimeout(() => { if(window.navigator.vibrate) window.navigator.vibrate(50); selectedMsgId = msgId; document.getElementById('delete-menu').classList.add('show'); }, 800); }
         function handlePressEnd() { clearTimeout(pressTimer); }
-        function listenForMsg(friendId) { const chatId = getChatId(friendId); db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => { const div = document.getElementById('messages'); div.innerHTML = ''; s.forEach(d => { const data = d.data(); const isMe = data.sender === auth.currentUser.uid; const ticks = isMe ? `<span class="text-[10px] ml-2 ${data.seen ? 'text-[#34b7f1]' : 'text-gray-400'}">${data.seen ? '✓✓' : '✓'}</span>` : ''; let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2 shadow-lg">` : ''; let vHTML = data.voice ? `<div class="voice-container"><div class="play-btn" onclick="event.stopPropagation();toggleAudio('${d.id}', '${data.voice}')"><span id="icon-${d.id}" class="material-icons-round text-white">play_arrow</span></div><div class="progress-bar"><div id="fill-${d.id}" class="progress-fill"></div></div></div>` : ''; let vmHTML = data.videoMsg ? `<video controls src="${data.videoMsg}" class="media-msg shadow-lg"></video>` : ''; let textMsg = data.text ? `<div>${data.text}</div>` : ''; const b = document.createElement('div'); b.className = `bubble ${isMe ? 'bubble-me' : 'bubble-them'}`; b.innerHTML = `${mediaHTML}${vHTML}${vmHTML}${textMsg}${ticks}`; if(isMe) { b.onmousedown = () => handlePressStart(d.id); b.onmouseup = handlePressEnd; b.ontouchstart = () => handlePressStart(d.id); b.ontouchend = handlePressEnd; } div.appendChild(b); if(!isMe && !data.seen) d.ref.update({seen: true}); }); div.scrollTop = div.scrollHeight; }); }
-        async function startVoiceRecord() { try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(voiceStream); mediaRecorder.start(100); audioChunks = []; startTime = Date.now(); document.getElementById('recording-overlay').style.display = 'flex'; timerInterval = setInterval(() => { const sec = Math.floor((Date.now() - startTime) / 1000); document.getElementById('rec-timer').innerText = `0:${sec < 10 ? '0' : ''}${sec}`; }, 1000); mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); }; let startX; document.getElementById('recording-overlay').ontouchstart = e => startX = e.touches[0].clientX; document.getElementById('recording-overlay').ontouchmove = e => { if (startX && (startX - e.touches[0].clientX > 80)) deleteRecording(); }; } catch(e) { alert("মাইক্রোফোন এক্সেস পাওয়া যায়নি!"); } }
-        function stopVoiceRecord(shouldSend) { if(!mediaRecorder || mediaRecorder.state === 'inactive') return; clearInterval(timerInterval); mediaRecorder.onstop = async () => { if(voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; } if(shouldSend && audioChunks.length > 0) { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const r = new FileReader(); r.readAsDataURL(blob); r.onload = async () => { await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ voice: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); deleteRecording(); }; } else { deleteRecording(); } }; mediaRecorder.stop(); }
+
+        function listenForMsg(friendId) {
+            const chatId = getChatId(friendId);
+            db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => {
+                const div = document.getElementById('messages'); div.innerHTML = '';
+                s.forEach(d => {
+                    const data = d.data(); const isMe = data.sender === auth.currentUser.uid;
+                    const ticks = isMe ? `<span class="text-[10px] ml-2 ${data.seen ? 'text-[#34b7f1]' : 'text-gray-400'}">${data.seen ? '✓✓' : '✓'}</span>` : '';
+                    let mediaHTML = "";
+                    if(data.media) mediaHTML = `<img src="${data.media}" class="media-msg shadow-lg">`;
+                    if(data.videoMsg) mediaHTML = `<video controls playsinline src="${data.videoMsg}" class="media-msg shadow-lg"></video>`;
+                    
+                    let contentHTML = data.voice ? `<div class="voice-container"><div class="play-btn" onclick="event.stopPropagation();toggleAudio('${d.id}', '${data.voice}')"><span id="icon-${d.id}" class="material-icons-round text-white">play_arrow</span></div><div class="progress-bar"><div id="fill-${d.id}" class="progress-fill"></div></div></div>` : `<div>${data.text || ""}</div>`;
+                    
+                    const b = document.createElement('div'); b.className = `bubble ${isMe ? 'bubble-me' : 'bubble-them'}`; b.innerHTML = `${mediaHTML}${contentHTML}${ticks}`;
+                    if(isMe) { b.onmousedown = () => handlePressStart(d.id); b.onmouseup = handlePressEnd; b.ontouchstart = () => handlePressStart(d.id); b.ontouchend = handlePressEnd; }
+                    div.appendChild(b); if(!isMe && !data.seen) d.ref.update({seen: true});
+                });
+                div.scrollTop = div.scrollHeight;
+            });
+        }
+
+        /* ভয়েস রেকর্ড ফিক্স */
+        async function startVoiceRecord() {
+            try {
+                voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(voiceStream); audioChunks = []; startTime = Date.now();
+                document.getElementById('recording-overlay').style.display = 'flex';
+                timerInterval = setInterval(() => { const sec = Math.floor((Date.now() - startTime) / 1000); document.getElementById('rec-timer').innerText = `0:${sec < 10 ? '0' : ''}${sec}`; }, 1000);
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.start(100);
+                let startX; document.getElementById('recording-overlay').ontouchstart = e => startX = e.touches[0].clientX;
+                document.getElementById('recording-overlay').ontouchmove = e => { if (startX && (startX - e.touches[0].clientX > 80)) deleteRecording(); };
+            } catch(e) { alert("মাইক্রোফোন এক্সেস পাওয়া যায়নি!"); }
+        }
+        function stopVoiceRecord(shouldSend) {
+            if(!mediaRecorder || mediaRecorder.state === 'inactive') return;
+            clearInterval(timerInterval);
+            mediaRecorder.onstop = async () => {
+                if(voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
+                if(shouldSend && audioChunks.length > 0) {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const r = new FileReader(); r.readAsDataURL(blob);
+                    r.onload = async () => { await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ voice: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); deleteRecording(); };
+                } else { deleteRecording(); }
+            };
+            mediaRecorder.stop();
+        }
         function deleteRecording() { if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); if(voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; } clearInterval(timerInterval); document.getElementById('recording-overlay').style.display = 'none'; }
+        
+        /* ভিডিও মেসেজ ফিক্স */
         async function openVideoRecorder() { document.getElementById('video-record-ui').style.display = 'flex'; const s = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 480 }, audio: true }); document.getElementById('record-preview').srcObject = s; }
         function closeVideoRecorder() { const s = document.getElementById('record-preview').srcObject; if(s) s.getTracks().forEach(t => t.stop()); document.getElementById('video-record-ui').style.display = 'none'; }
-        async function startVideoMsgRecord() { const s = document.getElementById('record-preview').srcObject; videoRecorder = new MediaRecorder(s); videoChunks = []; videoRecorder.ondataavailable = e => videoChunks.push(e.data); videoRecorder.onstop = async () => { const blob = new Blob(videoChunks, { type: 'video/webm' }); const r = new FileReader(); r.readAsDataURL(blob); r.onload = async () => { if(r.result.length > 1048576) return alert("ভিডিও অনেক বড়!"); await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ videoMsg: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); closeVideoRecorder(); }; }; videoRecorder.start(); document.getElementById('vid-record-btn').classList.add('animate-pulse'); let sec = 0; timerInterval = setInterval(() => { sec++; document.getElementById('vid-timer').innerText = `0:${sec < 10 ? '0' : ''}${sec} / 1:00`; if(sec >= 60) stopVideoMsgRecord(); }, 1000); document.getElementById('vid-record-btn').onclick = stopVideoMsgRecord; }
-        function stopVideoMsgRecord() { videoRecorder.stop(); clearInterval(timerInterval); }
+        async function startVideoMsgRecord() {
+            const s = document.getElementById('record-preview').srcObject;
+            videoRecorder = new MediaRecorder(s); videoChunks = [];
+            videoRecorder.ondataavailable = e => videoChunks.push(e.data);
+            videoRecorder.onstop = async () => {
+                const blob = new Blob(videoChunks, { type: 'video/webm' });
+                const r = new FileReader(); r.readAsDataURL(blob);
+                r.onload = async () => {
+                    if(r.result.length > 1048576) return alert("ভিডিও অনেক বড়!");
+                    await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ videoMsg: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false });
+                    closeVideoRecorder();
+                };
+            };
+            videoRecorder.start(); document.getElementById('vid-record-btn').classList.add('animate-pulse'); let sec = 0;
+            timerInterval = setInterval(() => { sec++; document.getElementById('vid-timer').innerText = `0:${sec < 10 ? '0' : ''}${sec} / 1:00`; if(sec >= 60) stopVideoMsgRecord(); }, 1000);
+            document.getElementById('vid-record-btn').onclick = stopVideoMsgRecord;
+        }
+        function stopVideoMsgRecord() { if(videoRecorder) videoRecorder.stop(); clearInterval(timerInterval); }
+
+        /* কলিং লজিক */
         async function initRTC() { pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] }); localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); localStream.getTracks().forEach(t => pc.addTrack(t, localStream)); pc.ontrack = e => document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('localVideo').srcObject = localStream; }
         async function initCallFlow() { dialtone.play(); document.getElementById('target-name-call').innerText = document.getElementById('chat-user-name').innerText; document.getElementById('target-img-call').src = document.getElementById('chat-user-img').src; document.getElementById('calling-ui').classList.remove('hidden'); await initRTC(); const callDoc = db.collection('calls').doc(currentChatId); pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON()); const offer = await pc.createOffer(); await pc.setLocalDescription(offer); await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now(), status: 'ringing' }); callDoc.onSnapshot(s => { const data = s.data(); if (data?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(data.answer)); } }); db.collection('calls').doc(currentChatId).collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data())))); }
         function listenForCalls(uid) { db.collection('calls').doc(uid).onSnapshot(async s => { const data = s.data(); if (data?.offer && data?.status === 'ringing' && (!pc || !pc.currentRemoteDescription)) { currentChatId = uid; document.getElementById('caller-name').innerText = data.callerName; document.getElementById('caller-img').src = data.callerPhoto; ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden'); } if (!s.exists || data?.status === 'ended') hangup(); }); }
         async function acceptCall() { ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); await initRTC(); const callDoc = db.collection('calls').doc(auth.currentUser.uid); pc.onicecandidate = e => e.candidate && db.collection('calls').doc(auth.currentUser.uid).collection('answerCandidates').add(e.candidate.toJSON()); const off = (await callDoc.get()).data().offer; await pc.setRemoteDescription(new RTCSessionDescription(off)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); await callDoc.update({ answer: { sdp: ans.sdp, type: ans.type }, status: 'connected' }); db.collection('calls').doc(auth.currentUser.uid).collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data())))); }
         async function hangup() { ringtone.pause(); dialtone.pause(); if(localStream) localStream.getTracks().forEach(t => t.stop()); if(pc) pc.close(); pc = null; await db.collection('calls').doc(auth.currentUser.uid).delete(); if(currentChatId) await db.collection('calls').doc(currentChatId).delete(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.add('hidden'); }
+        
         async function sendMsg() { const t = document.getElementById('msg-input').value; if(!t && !fileData) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ text: t || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); document.getElementById('msg-input').value = ''; fileData = null; }
-        function handleFile() { const f = document.getElementById('file-input').files[0]; const r = new FileReader(); r.onload = e => { fileData = e.target.result; sendMsg(); }; r.readAsDataURL(f); }
+        function handleFile() { const f = document.getElementById('file-input').files[0]; const r = new FileReader(); r.onload = e => { if(f.type.startsWith('image/')) { fileData = e.target.result; sendMsg(); } else if(f.type.startsWith('video/')) { db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ videoMsg: e.target.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); } }; r.readAsDataURL(f); }
         document.getElementById('msg-input').oninput = (e) => { const s = document.getElementById('send-btn'), r = document.getElementById('record-btn'); if(e.target.value.trim().length > 0) { s.classList.remove('hidden'); r.classList.add('hidden'); } else { s.classList.add('hidden'); r.classList.remove('hidden'); } };
     </script>
 </body>
