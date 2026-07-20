@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Soyel Pro Messenger - Super Fast</title>
+    <title>Soyel Pro Messenger</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -24,15 +24,17 @@
         .bubble { padding: 12px 16px; border-radius: 22px; max-width: 85%; font-size: 15px; color: white; position: relative; cursor: pointer; }
         .bubble-me { background: #075e54; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bubble-them { background: #1f2c33; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .input-bar { padding: 12px 12px 40px 12px; background: #0b141a; border-top: 1px solid rgba(255,255,255,0.05); }
+        .input-bar { padding: 10px 10px 35px 10px; background: #0b141a; border-top: 1px solid rgba(255,255,255,0.05); }
         .input-container { display: flex; align-items: center; gap: 8px; position: relative; }
         .text-input-field { flex: 1; background: #1f2c33; border-radius: 30px; display: flex; align-items: center; padding: 0 15px; }
         input#msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 0; font-size: 15px; }
-        #delete-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #1f2c33; border-radius: 30px 30px 0 0; padding: 25px 20px; z-index: 5000; display: none; transition: 0.3s; transform: translateY(100%); }
-        #delete-menu.show { display: block; transform: translateY(0); }
+        
+        /* পারমিশন বাটন এনিমেশন */
+        .perm-btn { background: #ef4444; color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.98); } 50% { transform: scale(1.02); } 100% { transform: scale(0.98); } }
     </style>
 </head>
-<body onclick="startAudio()" class="bg-app">
+<body class="bg-app">
 
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
@@ -40,18 +42,25 @@
     <div class="dark-overlay">
         <!-- ১. লগইন -->
         <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center">
-            <div class="glass p-12"><h1 class="text-3xl font-bold text-white mb-8 italic">Soyel Pro</h1><button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button></div>
+            <div class="glass p-12"><h1 class="text-3xl font-bold text-white mb-8 uppercase italic">Soyel Pro</h1><button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button></div>
         </div>
 
         <!-- ২. ড্যাশবোর্ড -->
         <div id="dashboard" class="hidden flex-1 flex flex-col p-6 overflow-hidden">
-            <header class="flex justify-between items-center text-white mb-10">
-                <img id="my-photo" src="" class="w-11 h-11 rounded-full border-2 border-indigo-400 shadow-lg">
-                <button onclick="showIdModal()" class="bg-[#4f46e5] px-5 py-2 rounded-xl text-xs font-bold shadow-lg">MY ID</button>
-            </header>
+            <header class="flex justify-between items-center text-white mb-10"><img id="my-photo" src="" class="w-11 h-11 rounded-full border-2 border-indigo-400"><button onclick="showIdModal()" class="bg-[#4f46e5] px-5 py-2 rounded-xl text-xs font-bold">MY ID</button></header>
+            
+            <!-- ইউজারদের জন্য সহজ পারমিশন বাটন -->
+            <div id="permission-box" class="mb-6">
+                <div onclick="getInitialPermission()" class="perm-btn">
+                    <span class="material-icons-round text-3xl mb-1">videocam</span>
+                    <p class="font-bold text-sm">ভিডিও ও সাউন্ড সচল করতে এখানে ক্লিক করুন</p>
+                    <p class="text-[10px] opacity-70">একবার এলাউ করলে আর ঝামেলা হবে না</p>
+                </div>
+            </div>
+
             <div class="space-y-6 flex-1 overflow-y-auto">
-                <div class="flex gap-2"><input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none"><button onclick="addNewContact()" class="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-xs shadow-lg active:scale-90">যোগ</button></div>
-                <div id="contact-list" class="pb-10"></div>
+                <div class="flex gap-2"><input id="target-id" type="text" placeholder="আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none"><button onclick="addNewContact()" class="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-xs shadow-lg">যোগ</button></div>
+                <div id="contact-list"></div>
             </div>
         </div>
     </div>
@@ -60,10 +69,9 @@
     <div id="chat-window">
         <div class="p-4 bg-[#0b141a] flex items-center gap-3 text-white border-b border-white/5">
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
-            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full border border-indigo-500 shadow-lg">
-            <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm truncate">...</h4><span class="text-[9px] text-green-500 font-bold uppercase tracking-widest">সক্রিয়</span></div>
-            <!-- ভিডিও কল বাটন (একদম শক্তিশালী লজিক) -->
-            <button onclick="initCallFlow()" class="p-2 text-green-500 bg-white/5 rounded-full shadow-lg"><span class="material-icons-round text-3xl">videocam</span></button>
+            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full">
+            <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4><span class="text-[9px] text-green-500 font-bold uppercase">অনলাইন</span></div>
+            <button onclick="initCallFlow()" class="p-2 text-green-500 bg-white/5 rounded-full"><span class="material-icons-round text-2xl">videocam</span></button>
         </div>
         <div id="messages"></div>
         <div class="input-bar">
@@ -77,23 +85,39 @@
     </div>
 
     <!-- ৪. কল স্ক্রিনসমূহ -->
-    <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-[#0b141a] flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-green-500 mb-8 overflow-hidden shadow-2xl"><img id="caller-img" src="" class="w-full h-full object-cover"></div><h2 id="caller-name" class="text-2xl font-bold mb-12">ইনকামিং কল...</h2><div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">videocam</span></button><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
+    <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-[#0b141a] flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-green-500 mb-8 overflow-hidden shadow-2xl"><img id="caller-img" src="" class="w-full h-full object-cover"></div><h2 id="caller-name" class="text-2xl font-bold mb-12">কল আসছে...</h2><div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl text-white">videocam</span></button><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
     <div id="calling-ui" class="hidden fixed inset-0 z-[3000] bg-black/90 flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-indigo-500 mb-8 overflow-hidden animate-pulse shadow-2xl"><img id="target-img-call" src="" class="w-full h-full object-cover"></div><h2 id="target-name-call" class="text-2xl font-bold mb-12">কল হচ্ছে...</h2><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round text-4xl text-white">call_end</span></button></div>
-    <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div class="absolute bottom-12 left-0 right-0 flex justify-center"><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/10"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
-
-    <!-- ডিলিট মেনু -->
-    <div id="delete-menu"><div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div><button onclick="deleteNow()" class="w-full bg-red-500/20 text-red-500 py-4 rounded-2xl font-bold">সবার জন্য ডিলিট করুন</button><button onclick="closeDeleteMenu()" class="w-full py-4 text-white/50 font-bold mt-2">বাতিল করুন</button></div>
+    <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div class="absolute bottom-12 left-0 right-0 flex justify-center"><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
     <div id="id-modal" class="hidden fixed inset-0 z-[5000] bg-black/90 flex items-center justify-center p-6" onclick="this.classList.add('hidden')"><div class="glass p-8 w-full max-w-sm text-center text-white" onclick="event.stopPropagation()"><p id="my-id-display" class="font-mono text-xs break-all bg-black/40 p-5 rounded-2xl border border-white/10 mb-6 font-bold tracking-tight">লোড হচ্ছে...</p><button onclick="navigator.clipboard.writeText(document.getElementById('my-id-display').innerText); alert('ID কপি হয়েছে!')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl font-bold shadow-lg">কপি করুন</button></div></div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCv0-AIv6osWK_sPelrG_u-socZdlJfFDY", authDomain: "video-3d955.firebaseapp.com", projectId: "video-3d955", storageBucket: "video-3d955.firebasestorage.app", messagingSenderId: "1016513647050", appId: "1:1016513647050:web:c089c4da5f6c00eb53bf33" };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
-        let pc = null, localStream, currentChatId, fileData = null, selectedMsgId = null;
-        let mediaRecorder, audioChunks = [], audioInstances = {};
+        let pc = null, localStream = null, currentChatId, fileData = null, audioInstances = {}, mediaRecorder, audioChunks = [];
         const ringtone = document.getElementById('ringtone'), dialtone = document.getElementById('dialtone');
 
-        function startAudio() { ringtone.play().then(()=>ringtone.pause()); dialtone.play().then(()=>dialtone.pause()); }
+        /* সাধারণ ইউজারদের জন্য সহজ পারমিশন লজিক */
+        async function getInitialPermission() {
+            try {
+                // ১. সাউন্ড আনলক করা
+                ringtone.play().then(() => ringtone.pause());
+                dialtone.play().then(() => dialtone.pause());
+                
+                // ২. ক্যামেরা ও মাইক পারমিশন একবারেই নিয়ে নেওয়া
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                
+                // ৩. পারমিশন সফল হলে বাটন সরিয়ে দেওয়া
+                document.getElementById('permission-box').style.display = 'none';
+                alert("সবকিছু সচল হয়েছে! এখন আপনি কল করতে ও রিসিভ করতে পারবেন।");
+                
+                // স্ট্রিমটি বন্ধ করে দেওয়া (কলের সময় আবার খুলবে)
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            } catch (err) {
+                alert("ক্যামেরা পারমিশন Block করা আছে। দয়া করে ব্রাউজারের উপরে তালা (Lock) আইকনে ক্লিক করে পারমিশন On করুন।");
+            }
+        }
 
         auth.onAuthStateChanged(async user => {
             if (user) {
@@ -102,7 +126,6 @@
                 document.getElementById('my-id-display').innerText = user.uid;
                 document.getElementById('my-photo').src = user.photoURL;
                 await db.collection('users').doc(user.uid).set({ name: user.displayName, photo: user.photoURL, uid: user.uid });
-                // লগইন করার সময় নিজের পুরনো সব কল ডাটা মুছে ফেলা (সবচেয়ে শক্তিশালী ফিক্স)
                 await db.collection('calls').doc(user.uid).delete();
                 listenForCalls(user.uid); loadContacts(user.uid);
             }
@@ -125,22 +148,7 @@
         function openChat(id, name, photo) { currentChatId = id; document.getElementById('chat-user-name').innerText = name; document.getElementById('chat-user-img').src = photo; document.getElementById('chat-window').style.display = 'flex'; listenForMsg(id); const chatId = getChatId(id); db.collection('chats').doc(chatId).collection('messages').where('sender', '==', id).get().then(s => s.forEach(d => d.ref.update({seen: true}))); }
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
         function getChatId(fId) { return auth.currentUser.uid < fId ? auth.currentUser.uid + "_" + fId : fId + "_" + auth.currentUser.uid; }
-        function closeDeleteMenu() { document.getElementById('delete-menu').classList.remove('show'); selectedMsgId = null; }
-        async function deleteNow() { if(!selectedMsgId) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').doc(selectedMsgId).delete(); closeDeleteMenu(); }
 
-        /* ভয়েস প্লে লজিক */
-        function toggleAudio(msgId, url) {
-            if (!audioInstances[msgId]) {
-                audioInstances[msgId] = new Audio(url);
-                audioInstances[msgId].ontimeupdate = () => { const f = document.getElementById('fill-' + msgId); if(f) f.style.width = (audioInstances[msgId].currentTime / audioInstances[msgId].duration) * 100 + "%"; };
-                audioInstances[msgId].onended = () => { document.getElementById('icon-' + msgId).innerText = "play_arrow"; };
-            }
-            const a = audioInstances[msgId];
-            if (a.paused) { a.play(); document.getElementById('icon-' + msgId).innerText = "pause"; }
-            else { a.pause(); document.getElementById('icon-' + msgId).innerText = "play_arrow"; }
-        }
-
-        /* মেসেজ লিসেনার */
         function listenForMsg(friendId) {
             const chatId = getChatId(friendId);
             db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => {
@@ -149,20 +157,14 @@
                     const data = d.data(); const isMe = data.sender === auth.currentUser.uid;
                     const ticks = isMe ? `<span class="text-[10px] ml-2 ${data.seen ? 'text-[#34b7f1]' : 'text-gray-400'}">${data.seen ? '✓✓' : '✓'}</span>` : '';
                     let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2 shadow-lg">` : '';
-                    let contentHTML = data.voice ? `<div class="voice-container"><div class="play-btn" onclick="event.stopPropagation();toggleAudio('${d.id}', '${data.voice}')"><span id="icon-${d.id}" class="material-icons-round text-white">play_arrow</span></div><div class="progress-bar"><div id="fill-${d.id}" class="progress-fill"></div></div></div>` : data.text;
+                    let contentHTML = data.voice ? `<audio controls src="${data.voice}" class="w-full h-8 mt-2"></audio>` : data.text;
                     const b = document.createElement('div'); b.className = `bubble ${isMe ? 'bubble-me' : 'bubble-them'}`; b.innerHTML = `${mediaHTML}${contentHTML}${ticks}`;
-                    if(isMe) { b.oncontextmenu = (e) => { e.preventDefault(); selectedMsgId = d.id; document.getElementById('delete-menu').classList.add('show'); }; }
                     div.appendChild(b); if(!isMe && !data.seen) d.ref.update({seen: true});
                 });
                 div.scrollTop = div.scrollHeight;
             });
         }
 
-        /* ভয়েস রেকর্ড */
-        async function startVoiceRecord() { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(s); mediaRecorder.start(); audioChunks = []; document.getElementById('record-btn').classList.add('animate-pulse'); mediaRecorder.ondataavailable = e => audioChunks.push(e.data); document.getElementById('record-btn').onclick = stopVoiceRecord; }
-        function stopVoiceRecord() { mediaRecorder.stop(); mediaRecorder.onstop = async () => { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const r = new FileReader(); r.readAsDataURL(blob); r.onload = async () => { await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ voice: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); }; document.getElementById('record-btn').classList.remove('animate-pulse'); document.getElementById('record-btn').onclick = startVoiceRecord; }; }
-
-        /* ভিডিও কল সিগন্যালিং - ১০০% শক্তিশালী ভার্সন */
         async function initRTC() {
             pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -178,21 +180,23 @@
             document.getElementById('calling-ui').classList.remove('hidden');
             await initRTC();
             const callDoc = db.collection('calls').doc(currentChatId);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').doc(Date.now().toString()).set(e.candidate.toJSON());
+            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON());
             const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, status: 'ringing' });
+            await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now(), status: 'ringing' });
             callDoc.onSnapshot(s => { const d = s.data(); if (d?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(d.answer)); } });
             db.collection('calls').doc(currentChatId).collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))));
         }
 
         function listenForCalls(uid) {
             db.collection('calls').doc(uid).onSnapshot(async s => {
-                const d = s.data();
-                if (d?.offer && d?.status === 'ringing' && (!pc || !pc.currentRemoteDescription)) {
-                    currentChatId = uid; document.getElementById('caller-name').innerText = d.callerName; document.getElementById('caller-img').src = d.callerPhoto;
+                const data = s.data();
+                if (data?.offer && data?.status === 'ringing' && (!pc || !pc.currentRemoteDescription)) {
+                    currentChatId = uid;
+                    document.getElementById('caller-name').innerText = data.callerName;
+                    document.getElementById('caller-img').src = data.callerPhoto;
                     ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden');
                 }
-                if (!s.exists || d?.status === 'ended') hangup();
+                if (!s.exists && pc) hangup();
             });
         }
 
@@ -200,7 +204,7 @@
             ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden');
             await initRTC();
             const callDoc = db.collection('calls').doc(auth.currentUser.uid);
-            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(auth.currentUser.uid).collection('answerCandidates').doc(Date.now().toString()).set(e.candidate.toJSON());
+            pc.onicecandidate = e => e.candidate && db.collection('calls').doc(auth.currentUser.uid).collection('answerCandidates').add(e.candidate.toJSON());
             const off = (await callDoc.get()).data().offer;
             await pc.setRemoteDescription(new RTCSessionDescription(off));
             const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
@@ -211,6 +215,8 @@
         async function hangup() { ringtone.pause(); dialtone.pause(); if(localStream) localStream.getTracks().forEach(t => t.stop()); if(pc) pc.close(); pc = null; await db.collection('calls').doc(auth.currentUser.uid).delete(); if(currentChatId) await db.collection('calls').doc(currentChatId).delete(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.add('hidden'); }
         async function sendMsg() { const t = document.getElementById('msg-input').value; if(!t && !fileData) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ text: t || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); document.getElementById('msg-input').value = ''; fileData = null; }
         function handleFile() { const f = document.getElementById('file-input').files[0]; const r = new FileReader(); r.onload = e => { fileData = e.target.result; sendMsg(); }; r.readAsDataURL(f); }
+        async function startVoiceRecord() { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(s); mediaRecorder.start(); audioChunks = []; mediaRecorder.ondataavailable = e => audioChunks.push(e.data); document.getElementById('record-btn').onclick = stopVoiceRecord; }
+        function stopVoiceRecord() { mediaRecorder.stop(); mediaRecorder.onstop = async () => { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const r = new FileReader(); r.readAsDataURL(blob); r.onload = async () => { await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ voice: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); }; document.getElementById('record-btn').onclick = startVoiceRecord; }; }
         document.getElementById('msg-input').oninput = (e) => { const s = document.getElementById('send-btn'), r = document.getElementById('record-btn'); if(e.target.value.trim().length > 0) { s.classList.remove('hidden'); r.classList.add('hidden'); } else { s.classList.add('hidden'); r.classList.remove('hidden'); } };
     </script>
 </body>
