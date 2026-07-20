@@ -16,29 +16,22 @@
         .bg-app { background-image: url('bg.jpg'); background-size: cover; background-position: center; }
         .dark-overlay { background: rgba(0, 0, 0, 0.6); height: 100%; width: 100%; display: flex; flex-direction: column; }
         .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px; }
-        
-        /* চ্যাট স্ক্রিন */
+        video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; }
         #chat-window { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; background-image: url('bg.jpg'); background-size: cover; background-position: center; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.7); }
-        
-        /* ভয়েস মেসেজ বাবল (WhatsApp Style) */
-        .bubble { padding: 12px; border-radius: 18px; min-width: 200px; max-width: 85%; position: relative; }
+        .bubble { padding: 12px; border-radius: 18px; min-width: 140px; max-width: 85%; position: relative; cursor: pointer; transition: opacity 0.2s; }
+        .bubble:active { opacity: 0.7; }
         .bubble-me { background: #075e54; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bubble-them { background: #1f2c33; color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
-        
-        /* কাস্টম অডিও প্লেয়ার */
         .voice-container { display: flex; align-items: center; gap: 10px; width: 100%; }
-        .play-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; items: center; justify-content: center; cursor: pointer; }
+        .play-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; items: center; justify-content: center; }
         .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
-        .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #34d399; width: 0%; transition: width 0.1s linear; }
-        
+        .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #34d399; width: 0%; }
         .status-ticks { font-size: 14px; align-self: flex-end; margin-top: 4px; }
         .seen { color: #34b7f1; } .unseen { color: #8696a0; }
-
-        /* ইনপুট বার */
         .input-area { padding: 10px 10px 35px 10px; background: #0b141a; border-top: 1px solid rgba(255,255,255,0.1); }
-        .record-overlay { display: none; align-items: center; background: #1e293b; border-radius: 30px; padding: 8px 15px; width: 100%; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .record-overlay { display: none; align-items: center; background: #1e293b; border-radius: 30px; padding: 8px 15px; width: 100%; }
     </style>
 </head>
 <body onclick="startAudio()" class="bg-app">
@@ -52,7 +45,7 @@
             <div class="glass p-12">
                 <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-24 h-24 mb-6 mx-auto">
                 <h1 class="text-3xl font-bold text-white mb-2 italic">SOYEL PRO</h1>
-                <button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl mt-6">গুগল দিয়ে প্রবেশ</button>
+                <button onclick="login()" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold shadow-xl">গুগল দিয়ে প্রবেশ</button>
             </div>
         </div>
 
@@ -93,7 +86,6 @@
                 <button id="send-txt-btn" onclick="sendMsg()" class="hidden bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round">send</span></button>
             </div>
 
-            <!-- রেকর্ড কন্ট্রোল -->
             <div id="record-ui" class="record-overlay">
                 <button onclick="deleteRecording()" class="text-red-500"><span class="material-icons-round">delete</span></button>
                 <div class="flex-1 px-4 flex items-center gap-3">
@@ -107,11 +99,11 @@
         </div>
     </div>
 
-    <!-- কল স্ক্রিনসমূহ (আগের মতোই) -->
+    <!-- ইনকামিং কল -->
     <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-[#0b141a] flex flex-col items-center justify-center text-white text-center p-6">
         <div class="w-32 h-32 rounded-full border-4 border-green-500 mb-8 overflow-hidden"><img id="caller-img" src="" class="w-full h-full object-cover"></div>
-        <h2 id="caller-name" class="text-2xl font-bold mb-12">ইনকামিং কল...</h2>
-        <div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">videocam</span></button><button onclick="rejectCall()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg"><span class="material-icons-round text-4xl">call_end</span></button></div>
+        <h2 id="caller-name" class="text-2xl font-bold mb-12">কল আসছে...</h2>
+        <div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">videocam</span></button><button onclick="rejectCall()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">call_end</span></button></div>
     </div>
 
     <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]">
@@ -158,7 +150,6 @@
         async function login() { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function showIdModal() { document.getElementById('id-modal').classList.remove('hidden'); }
 
-        // কন্টাক্ট লিস্ট লোড
         function loadContacts(myUid) {
             db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => {
                 const list = document.getElementById('contact-list'); list.innerHTML = '';
@@ -191,7 +182,16 @@
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
         function getChatId(fId) { return auth.currentUser.uid < fId ? auth.currentUser.uid + "_" + fId : fId + "_" + auth.currentUser.uid; }
 
-        // --- উন্নত ভয়েস মেসেজ লজিক ---
+        // --- ডিলিট মেসেজ লজিক ---
+        function confirmDelete(msgId) {
+            if(confirm("এই মেসেজটি সবার জন্য ডিলিট করতে চান?")) {
+                const chatId = getChatId(currentChatId);
+                db.collection('chats').doc(chatId).collection('messages').doc(msgId).delete()
+                .then(() => console.log("Deleted"))
+                .catch((e) => alert("ডিলিট করা সম্ভব হয়নি।"));
+            }
+        }
+
         async function startRecording() {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
@@ -199,7 +199,6 @@
             audioChunks = [];
             document.getElementById('normal-input').style.display = 'none';
             document.getElementById('record-ui').style.display = 'flex';
-            document.getElementById('timer').innerText = "রেকর্ড হচ্ছে...";
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         }
 
@@ -241,24 +240,12 @@
             document.getElementById('msg-input').value = ''; fileData = null;
         }
 
-        // কাস্টম অডিও প্লেয়ার কন্ট্রোল
         function playVoice(msgId, url) {
             const audio = new Audio(url);
             const fill = document.getElementById('fill-' + msgId);
-            const icon = document.getElementById('icon-' + msgId);
-            
-            icon.innerText = "pause";
             audio.play();
-            
-            audio.ontimeupdate = () => {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                fill.style.width = pct + "%";
-            };
-            
-            audio.onended = () => {
-                icon.innerText = "play_arrow";
-                fill.style.width = "0%";
-            };
+            audio.ontimeupdate = () => { fill.style.width = (audio.currentTime / audio.duration) * 100 + "%"; };
+            audio.onended = () => { fill.style.width = "0%"; };
         }
 
         function listenForMsg(friendId) {
@@ -268,29 +255,16 @@
                     const data = d.data(); const isMe = data.sender === auth.currentUser.uid;
                     const ticks = isMe ? `<span class="status-ticks ${data.seen ? 'seen' : 'unseen'}">${data.seen ? '✓✓' : '✓'}</span>` : '';
                     let mediaHTML = data.media ? `<img src="${data.media}" class="w-full rounded-lg mb-2">` : '';
-                    
-                    let contentHTML = data.text;
-                    if(data.voice) {
-                        contentHTML = `
-                            <div class="voice-container">
-                                <div class="play-btn" onclick="playVoice('${d.id}', '${data.voice}')">
-                                    <span id="icon-${d.id}" class="material-icons-round text-white">play_arrow</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div id="fill-${d.id}" class="progress-fill"></div>
-                                </div>
-                            </div>
-                        `;
-                    }
+                    let contentHTML = data.voice ? `<div class="voice-container"><div class="play-btn" onclick="event.stopPropagation();playVoice('${d.id}', '${data.voice}')"><span class="material-icons-round text-white">play_arrow</span></div><div class="progress-bar"><div id="fill-${d.id}" class="progress-fill"></div></div></div>` : data.text;
 
-                    div.innerHTML += `<div class="bubble ${isMe ? 'bubble-me' : 'bubble-them'}">${mediaHTML}${contentHTML}${ticks}</div>`;
+                    div.innerHTML += `<div class="bubble ${isMe ? 'bubble-me' : 'bubble-them'}" onclick="${isMe ? `confirmDelete('${d.id}')` : ''}">${mediaHTML}${contentHTML}${ticks}</div>`;
                     if(!isMe && !data.seen) d.ref.update({seen: true});
                 });
                 div.scrollTop = div.scrollHeight;
             });
         }
 
-        // --- ভিডিও কল লজিক (আগের মতোই) ---
+        // --- ভিডিও কল লজিক ---
         async function startCall() {
             dialtone.play(); document.getElementById('calling-ui').classList.remove('hidden');
             pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] });
@@ -337,7 +311,6 @@
         function rejectCall() { ringtone.pause(); db.collection('calls').doc(auth.currentUser.uid).delete(); document.getElementById('incoming-ui').classList.add('hidden'); }
         function handleFile() { const file = document.getElementById('file-input').files[0]; const reader = new FileReader(); reader.onload = e => { fileData = e.target.result; sendMsg(); }; reader.readAsDataURL(file); }
         
-        // সেন্ড বাটন কন্ট্রোল
         document.getElementById('msg-input').oninput = (e) => {
             const sendBtn = document.getElementById('send-txt-btn');
             const micBtn = document.getElementById('record-btn');
