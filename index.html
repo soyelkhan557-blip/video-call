@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Soyel Pro Messenger - Stable Version</title>
+    <title>Soyel Pro Messenger</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -12,137 +12,336 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
-        body { font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; background-color: #0f172a; height: 100vh; -webkit-tap-highlight-color: transparent; }
-        .bg-app { background-image: url('bg.jpg'); background-size: cover; background-position: center; }
-        .dark-overlay { background: rgba(0, 0, 0, 0.6); height: 100%; width: 100%; display: flex; flex-direction: column; }
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; }
-        video { width: 100%; height: 100%; object-fit: cover; background: #000; }
-        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid #fff; z-index: 10; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #chat-window { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; background-image: url('bg.jpg'); background-size: cover; background-position: center; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.7); }
-        .bubble { padding: 12px 16px; border-radius: 22px; max-width: 85%; font-size: 15px; color: white; position: relative; cursor: pointer; }
-        .bubble-me { background: #075e54; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .bubble-them { background: #1f2c33; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .media-msg { width: 100%; border-radius: 15px; margin-bottom: 5px; max-height: 250px; object-fit: cover; }
-        .voice-container { display: flex; align-items: center; gap: 10px; min-width: 180px; }
-        .play-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; items: center; justify-content: center; }
-        .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; position: relative; }
-        .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #34d399; width: 0%; transition: width 0.1s linear; }
-        .input-bar { padding: 10px 10px 35px 10px; background: #0b141a; border-top: 1px solid rgba(255,255,255,0.05); }
-        .input-container { display: flex; align-items: center; gap: 8px; position: relative; }
-        .text-input-field { flex: 1; background: #1f2c33; border-radius: 30px; display: flex; align-items: center; padding: 0 10px; }
-        input#msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 5px; font-size: 15px; }
-        .recording-ui { position: absolute; inset: 0; background: #0b141a; display: none; align-items: center; border-radius: 30px; z-index: 10; }
-        .slide-cancel { color: #8696a0; font-size: 11px; margin-left: auto; animation: slideLeft 1.5s infinite; }
-        @keyframes slideLeft { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(-20px); opacity: 0; } }
-        #delete-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #1f2c33; border-radius: 30px 30px 0 0; padding: 25px 20px; z-index: 5000; display: none; transition: 0.3s; transform: translateY(100%); border-top: 1px solid rgba(255,255,255,0.1); }
-        #delete-menu.show { display: block; transform: translateY(0); }
-        .menu-btn { width: 100%; padding: 16px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
+        
+        :root {
+            --bg-dark: #0b141a;
+            --wa-green: #00a884;
+            --bubble-me: #005c4b;
+            --bubble-them: #202c33;
+        }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: var(--bg-dark); 
+            height: 100vh; 
+            padding-bottom: env(safe-area-inset-bottom);
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        /* নোটিফিকেশন বার */
+        #custom-toast {
+            position: fixed;
+            top: env(safe-area-inset-top, 20px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 9999;
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            width: 90%;
+            max-width: 400px;
+        }
+        #custom-toast.show { transform: translateX(-50%) translateY(20px); }
+        .toast-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 25px;
+            border-radius: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* চ্যাট স্ক্রিন */
+        #chat-window { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; background-color: var(--bg-dark); }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .bubble { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 15px; color: white; position: relative; }
+        .bubble-me { background: var(--bubble-me); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .bubble-them { background: var(--bubble-them); align-self: flex-start; border-bottom-left-radius: 4px; }
+
+        .media-msg { max-width: 100%; border-radius: 12px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* ভয়েস বাটন ও ইনপুট */
+        .bottom-bar { padding: 10px 10px 30px 10px; background: var(--bg-dark); display: flex; align-items: center; gap: 10px; }
+        .input-wrapper { flex: 1; background: #2a3942; border-radius: 30px; display: flex; align-items: center; padding: 0 12px; }
+        #msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 5px; }
+
+        #rec-timer { display: none; color: white; font-weight: bold; flex: 1; align-items: center; gap: 10px; }
+        .recording-dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .action-btn { background: var(--wa-green); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; items: center; justify-content: center; transition: 0.3s; }
+
+        /* কল স্ক্রিন */
+        .call-ui { position: fixed; inset: 0; z-index: 5000; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .call-avatar { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--wa-green); padding: 5px; margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(0, 168, 132, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); } }
     </style>
 </head>
-<body onclick="startAudio()" class="bg-app">
+<body onclick="enableAudio()">
+
+    <!-- প্রফেশনাল নোটিফিকেশন বার -->
+    <div id="custom-toast">
+        <div class="toast-content">
+            <span class="material-icons-round text-yellow-400">notifications_active</span>
+            <span id="toast-text">...</span>
+        </div>
+    </div>
+
+    <!-- লগইন পেজ -->
+    <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center">
+        <h1 class="text-4xl font-bold text-white mb-10 italic">Soyel Pro</h1>
+        <div class="w-full max-w-xs space-y-4">
+            <input id="login-phone" placeholder="মোবাইল নম্বর" class="w-full p-4 rounded-2xl bg-white/10 text-white outline-none">
+            <input id="login-pass" type="password" placeholder="পাসওয়ার্ড" class="w-full p-4 rounded-2xl bg-white/10 text-white outline-none">
+            <button onclick="authAction()" class="w-full bg-indigo-600 p-4 rounded-2xl text-white font-bold">লগইন / সাইন আপ</button>
+        </div>
+    </div>
+
+    <!-- ড্যাশবোর্ড -->
+    <div id="dashboard" class="hidden h-screen flex flex-col p-6 text-white">
+        <div class="flex justify-between items-center mb-8">
+            <img id="my-photo" class="w-12 h-12 rounded-full border-2 border-indigo-500" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+            <button onclick="showMyId()" class="bg-indigo-600 px-4 py-2 rounded-xl text-xs font-bold uppercase">MY ID</button>
+        </div>
+        <div class="flex gap-2 mb-6">
+            <input id="friend-id" placeholder="বন্ধুর আইডি দিন" class="flex-1 bg-white/5 p-4 rounded-2xl outline-none">
+            <button onclick="addFriend()" class="bg-indigo-600 px-6 rounded-2xl font-bold">যোগ</button>
+        </div>
+        <div id="friend-list" class="flex-1 overflow-y-auto space-y-3"></div>
+    </div>
+
+    <!-- চ্যাট উইন্ডো -->
+    <div id="chat-window">
+        <div class="p-4 flex items-center gap-4 text-white border-b border-white/5">
+            <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
+            <img id="chat-user-img" class="w-10 h-10 rounded-full">
+            <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4><span class="text-green-500 text-[10px] font-bold">অনলাইন</span></div>
+            <button onclick="startCall()"><span class="material-icons-round text-indigo-400 text-3xl">videocam</span></button>
+        </div>
+        
+        <div id="messages"></div>
+
+        <div class="bottom-bar">
+            <div class="input-wrapper">
+                <button onclick="triggerGallery()"><span class="material-icons-round text-gray-400">add</span></button>
+                <div id="rec-timer"><div class="recording-dot"></div><span id="timer-text">0:00</span></div>
+                <input id="msg-input" type="text" placeholder="মেসেজ লিখুন..." autocomplete="off">
+            </div>
+            <button id="mic-btn" class="action-btn" onclick="handleVoice()"><span class="material-icons-round">mic</span></button>
+            <button id="send-btn" class="action-btn hidden" onclick="sendTextMsg()"><span class="material-icons-round">send</span></button>
+        </div>
+        <input type="file" id="gallery-input" class="hidden" accept="image/*,video/*" onchange="uploadMedia()">
+    </div>
+
+    <!-- কল স্ক্রিন -->
+    <div id="call-ui" class="hidden call-ui">
+        <img id="call-img" class="call-avatar">
+        <h2 id="call-name" class="text-2xl font-bold">...</h2>
+        <p id="call-stat" class="mt-4 text-indigo-400 font-bold uppercase tracking-widest text-xs">Calling...</p>
+        <div class="mt-20 flex gap-12">
+            <button onclick="hangup()" class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center"><span class="material-icons-round text-4xl">call_end</span></button>
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-20 h-20 bg-green-500 rounded-full flex items-center justify-center"><span class="material-icons-round text-4xl">videocam</span></button>
+        </div>
+    </div>
+
+    <!-- অডিও এলিমেন্ট -->
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
-    <div class="dark-overlay">
-        <!-- ১. লগইন পেজ -->
-        <div id="login-page" class="h-screen flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-            <div class="glass p-8 w-full max-w-sm">
-                <img src="https://cdn-icons-png.flaticon.com/512/3649/3649460.png" class="w-16 h-16 mb-4 mx-auto">
-                <h1 class="text-2xl font-bold text-white mb-6 italic tracking-tight">Soyel Pro</h1>
-                <button onclick="login()" class="w-full bg-white text-black py-4 rounded-2xl font-bold shadow-lg mb-4 flex items-center justify-center gap-2">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_optimize/google.svg" width="18"> গুগল দিয়ে প্রবেশ
-                </button>
-                <div class="flex items-center gap-2 my-4 opacity-40"><hr class="flex-1 border-white/30"> <span class="text-white text-[10px] font-bold">অথবা</span> <hr class="flex-1 border-white/30"></div>
-                <input id="login-email" type="text" placeholder="ইমেইল বা ফোন নম্বর" class="w-full p-4 bg-white/10 rounded-xl text-white outline-none mb-3 text-sm border border-white/10">
-                <input id="login-pass" type="password" placeholder="পাসওয়ার্ড (৬ অক্ষর)" class="w-full p-4 bg-white/10 rounded-xl text-white outline-none mb-4 text-sm border border-white/10">
-                <button onclick="loginEmail()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg">লগইন / সাইন আপ</button>
-            </div>
-        </div>
-
-        <!-- ২. ড্যাশবোর্ড -->
-        <div id="dashboard" class="hidden flex-1 flex flex-col p-6 overflow-hidden">
-            <header class="flex justify-between items-center text-white mb-10"><img id="my-photo" src="" class="w-11 h-11 rounded-full border-2 border-indigo-400"><button onclick="showIdModal()" class="bg-[#4f46e5] px-5 py-2 rounded-xl text-xs font-bold shadow-lg uppercase">MY ID</button></header>
-            <div class="space-y-6 flex-1 overflow-y-auto">
-                <div class="flex gap-2"><input id="target-id" type="text" placeholder="বন্ধুর আইডি দিন" class="flex-1 p-4 glass text-white text-xs outline-none border-none focus:ring-1 ring-indigo-500"><button onclick="addNewContact()" class="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-xs shadow-lg active:scale-90">যোগ</button></div>
-                <div id="contact-list" class="pb-10"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ৩. চ্যাট উইন্ডো -->
-    <div id="chat-window">
-        <div class="p-4 bg-[#0b141a] flex items-center gap-3 text-white border-b border-white/5">
-            <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
-            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full border border-indigo-500">
-            <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm truncate">...</h4><span class="text-[9px] text-green-500 font-bold uppercase">অনলাইন</span></div>
-            <button onclick="initCallFlow()" class="p-2 text-green-500 bg-white/5 rounded-full"><span class="material-icons-round text-2xl">videocam</span></button>
-        </div>
-        <div id="messages"></div>
-        <div class="input-bar">
-            <div class="input-container flex items-center gap-2">
-                <div id="normal-input" class="text-input-field"><button onclick="document.getElementById('file-input').click()" class="text-[#8696a0] pr-2"><span class="material-icons-round">add_circle</span></button><input id="msg-input" type="text" placeholder="মেসেজ লিখুন..." autocomplete="off"></div>
-                <div id="recording-overlay" class="recording-ui"><span class="material-icons-round text-red-500 animate-pulse pl-4">mic</span><span id="rec-timer" class="text-white font-bold ml-10">0:00</span><span class="slide-cancel">বাতিল করতে টানুন <span class="material-icons-round text-sm">chevron_left</span></span><button id="v-send-btn" onclick="stopVoiceRecord(true)" class="bg-[#00a884] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg ml-auto mr-2 active:scale-90"><span class="material-icons-round text-sm">send</span></button></div>
-                <button id="record-btn" onclick="startVoiceRecord()" class="bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg ml-2"><span class="material-icons-round">mic</span></button>
-                <button id="send-btn" onclick="sendMsg()" class="hidden bg-[#00a884] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg ml-2"><span class="material-icons-round">send</span></button>
-            </div>
-            <input type="file" id="file-input" class="hidden" accept="image/*,video/*" onchange="handleFile()">
-        </div>
-    </div>
-
-    <!-- ৪. কল স্ক্রিনসমূহ -->
-    <div id="incoming-ui" class="hidden fixed inset-0 z-[3000] bg-[#0b141a] flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-green-500 mb-8 overflow-hidden shadow-2xl"><img id="caller-img" src="" class="w-full h-full object-cover"></div><h2 id="caller-name" class="text-2xl font-bold mb-12">ইনকামিং কল...</h2><div class="flex gap-12"><button onclick="acceptCall()" class="w-20 h-20 bg-green-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">videocam</span></button><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full shadow-lg flex items-center justify-center"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
-    <div id="calling-ui" class="hidden fixed inset-0 z-[3000] bg-black/90 flex flex-col items-center justify-center text-white text-center p-6"><div class="w-32 h-32 rounded-full border-4 border-indigo-500 mb-8 overflow-hidden animate-pulse shadow-2xl"><img id="target-img-call" src="" class="w-full h-full object-cover"></div><h2 id="target-name-call" class="text-2xl font-bold mb-12">কল হচ্ছে...</h2><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round text-4xl text-white">call_end</span></button></div>
-    <div id="video-page" class="hidden fixed inset-0 bg-black z-[2500]"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div class="absolute bottom-12 left-0 right-0 flex justify-center"><button onclick="hangup()" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/10"><span class="material-icons-round text-4xl text-white">call_end</span></button></div></div>
-    <div id="delete-menu"><div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div><button onclick="deleteNow()" class="menu-btn bg-red-500/20 text-red-500">সবার জন্য ডিলিট</button><button onclick="closeDeleteMenu()" class="menu-btn bg-white/5 text-white">বাতিল করুন</button></div>
-    <div id="id-modal" class="hidden fixed inset-0 z-[5000] bg-black/90 flex items-center justify-center p-6" onclick="this.classList.add('hidden')"><div class="glass p-8 w-full max-w-sm text-center text-white" onclick="event.stopPropagation()"><p id="my-id-display" class="font-mono text-xs break-all bg-black/40 p-5 rounded-2xl border border-white/10 mb-6 font-bold tracking-tight">লোড হচ্ছে...</p><button onclick="navigator.clipboard.writeText(document.getElementById('my-id-display').innerText); alert('ID কপি হয়েছে!')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl font-bold shadow-lg">কপি করুন</button></div></div>
-
     <script>
+        // ফায়ারবেস কনফিগারেশন
         const firebaseConfig = { apiKey: "AIzaSyCv0-AIv6osWK_sPelrG_u-socZdlJfFDY", authDomain: "video-3d955.firebaseapp.com", projectId: "video-3d955", storageBucket: "video-3d955.firebasestorage.app", messagingSenderId: "1016513647050", appId: "1:1016513647050:web:c089c4da5f6c00eb53bf33" };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
-        let pc = null, localStream, currentChatId, fileData = null, selectedMsgId = null, audioInstances = {}, mediaRecorder = null, voiceStream = null, audioChunks = [], timerInterval, startTime;
-        const ringtone = document.getElementById('ringtone'), dialtone = document.getElementById('dialtone');
 
-        function startAudio() { ringtone.play().then(()=>ringtone.pause()); dialtone.play().then(()=>dialtone.pause()); }
-        
-        async function loginEmail() {
-            const input = document.getElementById('login-email').value.trim();
+        let currentChatId, mediaRecorder, chunks = [], recInt, isRec = false, pc;
+        const rt = document.getElementById('ringtone'), dt = document.getElementById('dialtone');
+
+        function enableAudio() { rt.play().then(()=>rt.pause()); dt.play().then(()=>dt.pause()); }
+
+        function showToast(msg) {
+            const t = document.getElementById('custom-toast');
+            document.getElementById('toast-text').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // লগইন ফাংশন
+        async function authAction() {
+            const phone = document.getElementById('login-phone').value.trim();
             const pass = document.getElementById('login-pass').value;
-            if(!input || !pass) return alert("ইমেইল বা ফোন এবং পাসওয়ার্ড দিন");
-            const email = input.includes('@') ? input : input + "@soyel.com";
-            try { await auth.signInWithEmailAndPassword(email, pass); } catch(e) {
-                if(e.code === 'auth/user-not-found' || e.code === 'auth/invalid-email') {
-                    try { await auth.createUserWithEmailAndPassword(email, pass); alert("একাউন্ট তৈরি হয়েছে!"); } catch(err) { alert("৬ অক্ষরের পাসওয়ার্ড দিন!"); }
-                } else alert("পাসওয়ার্ড ভুল!");
+            if(!phone || pass.length < 6) return showToast("সঠিক নম্বর ও ৬ অক্ষরের পাসওয়ার্ড দিন");
+            const email = phone + "@soyel.com";
+            try { await auth.signInWithEmailAndPassword(email, pass); } 
+            catch { try { await auth.createUserWithEmailAndPassword(email, pass); } catch(e) { showToast(e.message); } }
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('my-photo').src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                db.collection('users').doc(user.uid).set({ uid: user.uid, name: user.email.split('@')[0], photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+                loadFriends(); listenForCalls();
+            }
+        });
+
+        function loadFriends() {
+            db.collection('users').doc(auth.currentUser.uid).collection('friends').onSnapshot(snap => {
+                const list = document.getElementById('friend-list'); list.innerHTML = '';
+                snap.forEach(async doc => {
+                    const u = (await db.collection('users').doc(doc.id).get()).data();
+                    if(u) {
+                        const d = document.createElement('div');
+                        d.className = "flex items-center gap-4 bg-white/5 p-4 rounded-2xl";
+                        d.innerHTML = `<img src="${u.photo}" class="w-12 h-12 rounded-full border border-indigo-500"><div class="font-bold flex-1">${u.name}</div>`;
+                        d.onclick = () => openChat(u.uid, u.name, u.photo);
+                        list.appendChild(d);
+                    }
+                });
+            });
+        }
+
+        async function addFriend() {
+            const id = document.getElementById('friend-id').value.trim();
+            if(id && id !== auth.currentUser.uid) {
+                await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).set({added: true});
+                showToast("বন্ধু যুক্ত হয়েছে!");
+                document.getElementById('friend-id').value = '';
             }
         }
 
-        auth.onAuthStateChanged(async user => { if (user) { document.getElementById('login-page').classList.add('hidden'); document.getElementById('dashboard').classList.remove('hidden'); document.getElementById('my-id-display').innerText = user.uid; document.getElementById('my-photo').src = user.photoURL || "https://cdn-icons-png.flaticon.com/512/3649/3649460.png"; await db.collection('users').doc(user.uid).set({ name: user.displayName || user.email.split('@')[0], photo: user.photoURL || "https://cdn-icons-png.flaticon.com/512/3649/3649460.png", uid: user.uid }); await db.collection('calls').doc(user.uid).delete(); listenForCalls(user.uid); loadContacts(user.uid); } });
-        async function login() { await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); }
-        function showIdModal() { document.getElementById('id-modal').classList.remove('hidden'); }
-        function loadContacts(myUid) { db.collection('users').doc(myUid).collection('contacts').onSnapshot(snap => { const list = document.getElementById('contact-list'); list.innerHTML = ''; snap.forEach(async doc => { const fDoc = await db.collection('users').doc(doc.id).get(); const fData = fDoc.data(); if(fData) { const item = document.createElement('div'); item.className = "contact-item bg-white/5 p-4 rounded-2xl mb-3 flex items-center gap-3"; item.innerHTML = `<img src="${fData.photo}" class="w-12 h-12 rounded-full border border-indigo-500 shadow-lg"><div class="flex-1 text-white font-bold text-sm">${fData.name}</div><span class="material-icons-round text-[#00a884]">chevron_right</span>`; item.onclick = () => openChat(fData.uid, fData.name, fData.photo); list.appendChild(item); } }); }); }
-        async function addNewContact() { const id = document.getElementById('target-id').value.trim(); if(!id || id === auth.currentUser.uid) return alert("সঠিক আইডি দিন"); await db.collection('users').doc(auth.currentUser.uid).collection('contacts').doc(id).set({ added: true }); await db.collection('users').doc(id).collection('contacts').doc(auth.currentUser.uid).set({ added: true }); document.getElementById('target-id').value = ''; const fDoc = await db.collection('users').doc(id).get(); if(fDoc.exists) openChat(id, fDoc.data().name, fDoc.data().photo); }
-        function openChat(id, name, photo) { currentChatId = id; document.getElementById('chat-user-name').innerText = name; document.getElementById('chat-user-img').src = photo; document.getElementById('chat-window').style.display = 'flex'; listenForMsg(id); const chatId = getChatId(id); db.collection('chats').doc(chatId).collection('messages').where('sender', '==', id).get().then(s => s.forEach(d => d.ref.update({seen: true}))); }
+        // চ্যাট লজিক
+        function openChat(id, name, img) {
+            currentChatId = id;
+            document.getElementById('chat-user-name').innerText = name;
+            document.getElementById('chat-user-img').src = img;
+            document.getElementById('chat-window').style.display = 'flex';
+            listenMessages();
+        }
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-        function getChatId(fId) { return auth.currentUser.uid < fId ? auth.currentUser.uid + "_" + fId : fId + "_" + auth.currentUser.uid; }
-        function closeDeleteMenu() { document.getElementById('delete-menu').classList.remove('show'); selectedMsgId = null; }
-        async function deleteNow() { if(!selectedMsgId) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').doc(selectedMsgId).delete(); closeDeleteMenu(); }
-        function toggleAudio(msgId, url) { if (!audioInstances[msgId]) { audioInstances[msgId] = new Audio(url); audioInstances[msgId].ontimeupdate = () => { const f = document.getElementById('fill-' + msgId); if(f) f.style.width = (audioInstances[msgId].currentTime / audioInstances[msgId].duration) * 100 + "%"; }; audioInstances[msgId].onended = () => { document.getElementById('icon-' + msgId).innerText = "play_arrow"; }; } const a = audioInstances[msgId]; if (a.paused) { a.play(); document.getElementById('icon-' + msgId).innerText = "pause"; } else { a.pause(); document.getElementById('icon-' + msgId).innerText = "play_arrow"; } }
-        let pressTimer; function handlePressStart(msgId) { pressTimer = setTimeout(() => { if(window.navigator.vibrate) window.navigator.vibrate(50); selectedMsgId = msgId; document.getElementById('delete-menu').classList.add('show'); }, 800); }
-        function handlePressEnd() { clearTimeout(pressTimer); }
-        function listenForMsg(friendId) { const chatId = getChatId(friendId); db.collection('chats').doc(chatId).collection('messages').orderBy('ts').onSnapshot(s => { const div = document.getElementById('messages'); div.innerHTML = ''; s.forEach(d => { const data = d.data(); const isMe = data.sender === auth.currentUser.uid; const ticks = isMe ? `<span class="text-[10px] ml-2 ${data.seen ? 'text-[#34b7f1]' : 'text-gray-400'}">${data.seen ? '✓✓' : '✓'}</span>` : ''; let mHTML = ""; if(data.media) mHTML = `<img src="${data.media}" class="media-msg shadow-lg">`; if(data.videoMsg) mHTML = `<video controls playsinline src="${data.videoMsg}" class="media-msg shadow-lg"></video>`; let cHTML = data.voice ? `<div class="voice-container"><div class="play-btn" onclick="event.stopPropagation();toggleAudio('${d.id}', '${data.voice}')"><span id="icon-${d.id}" class="material-icons-round text-white">play_arrow</span></div><div class="progress-bar"><div id="fill-${d.id}" class="progress-fill"></div></div></div>` : `<div>${data.text || ""}</div>`; const b = document.createElement('div'); b.className = `bubble ${isMe ? 'bubble-me' : 'bubble-them'}`; b.innerHTML = `${mHTML}${cHTML}${ticks}`; if(isMe) { b.onmousedown = () => handlePressStart(d.id); b.onmouseup = handlePressEnd; b.ontouchstart = () => handlePressStart(d.id); b.ontouchend = handlePressEnd; } div.appendChild(b); if(!isMe && !data.seen) d.ref.update({seen: true}); }); div.scrollTop = div.scrollHeight; }); }
-        async function startVoiceRecord() { try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(voiceStream); audioChunks = []; startTime = Date.now(); document.getElementById('recording-overlay').style.display = 'flex'; timerInterval = setInterval(() => { const sec = Math.floor((Date.now() - startTime) / 1000); document.getElementById('rec-timer').innerText = `0:${sec < 10 ? '0' : ''}${sec}`; }, 1000); mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); }; mediaRecorder.start(100); } catch(e) { alert("মাইক্রোফোন এক্সেস পাওয়া যায়নি!"); } }
-        function stopVoiceRecord(shouldSend) { if(!mediaRecorder || mediaRecorder.state === 'inactive') return; clearInterval(timerInterval); mediaRecorder.onstop = async () => { if(voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; } if(shouldSend && audioChunks.length > 0) { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const r = new FileReader(); r.readAsDataURL(blob); r.onload = async () => { await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ voice: r.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); deleteRecording(); }; } else { deleteRecording(); } }; mediaRecorder.stop(); }
-        function deleteRecording() { if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); if(voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; } clearInterval(timerInterval); document.getElementById('recording-overlay').style.display = 'none'; }
-        async function initRTC() { pc = new RTCPeerConnection({ iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] }); localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); localStream.getTracks().forEach(t => pc.addTrack(t, localStream)); pc.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; }; document.getElementById('localVideo').srcObject = localStream; }
-        async function initCallFlow() { dialtone.play(); document.getElementById('target-name-call').innerText = document.getElementById('chat-user-name').innerText; document.getElementById('target-img-call').src = document.getElementById('chat-user-img').src; document.getElementById('calling-ui').classList.remove('hidden'); await initRTC(); const callDoc = db.collection('calls').doc(currentChatId); pc.onicecandidate = e => e.candidate && db.collection('calls').doc(currentChatId).collection('offerCandidates').add(e.candidate.toJSON()); const offer = await pc.createOffer(); await pc.setLocalDescription(offer); await callDoc.set({ offer: { sdp: offer.sdp, type: offer.type }, callerName: auth.currentUser.displayName, callerPhoto: auth.currentUser.photoURL, ts: Date.now(), status: 'ringing' }); callDoc.onSnapshot(s => { const data = s.data(); if (data?.answer && !pc.currentRemoteDescription) { dialtone.pause(); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); pc.setRemoteDescription(new RTCSessionDescription(data.answer)); } }); db.collection('calls').doc(currentChatId).collection('answerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data())))); }
-        function listenForCalls(uid) { db.collection('calls').doc(uid).onSnapshot(async s => { const data = s.data(); if (data?.offer && data?.status === 'ringing' && (!pc || !pc.currentRemoteDescription)) { currentChatId = uid; document.getElementById('caller-name').innerText = data.callerName; document.getElementById('caller-img').src = data.callerPhoto; ringtone.play(); document.getElementById('incoming-ui').classList.remove('hidden'); } if (!s.exists || data?.status === 'ended') hangup(); }); }
-        async function acceptCall() { ringtone.pause(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('video-page').classList.remove('hidden'); await initRTC(); const callDoc = db.collection('calls').doc(auth.currentUser.uid); pc.onicecandidate = e => e.candidate && db.collection('calls').doc(auth.currentUser.uid).collection('answerCandidates').add(e.candidate.toJSON()); const off = (await callDoc.get()).data().offer; await pc.setRemoteDescription(new RTCSessionDescription(off)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); await callDoc.update({ answer: { sdp: ans.sdp, type: ans.type }, status: 'connected' }); db.collection('calls').doc(auth.currentUser.uid).collection('offerCandidates').onSnapshot(s => s.docChanges().forEach(c => c.type==='added' && pc.addIceCandidate(new RTCIceCandidate(c.doc.data())))); }
-        async function hangup() { ringtone.pause(); dialtone.pause(); if(localStream) localStream.getTracks().forEach(t => t.stop()); if(pc) pc.close(); pc = null; await db.collection('calls').doc(auth.currentUser.uid).delete(); if(currentChatId) await db.collection('calls').doc(currentChatId).delete(); document.getElementById('incoming-ui').classList.add('hidden'); document.getElementById('calling-ui').classList.add('hidden'); document.getElementById('video-page').classList.add('hidden'); }
-        async function sendMsg() { const t = document.getElementById('msg-input').value; if(!t && !fileData) return; await db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ text: t || "", media: fileData || null, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); document.getElementById('msg-input').value = ''; fileData = null; }
-        function handleFile() { const f = document.getElementById('file-input').files[0]; const r = new FileReader(); r.onload = e => { if(f.type.startsWith('image/')) { fileData = e.target.result; sendMsg(); } else if(f.type.startsWith('video/')) { db.collection('chats').doc(getChatId(currentChatId)).collection('messages').add({ videoMsg: e.target.result, sender: auth.currentUser.uid, ts: firebase.firestore.FieldValue.serverTimestamp(), seen: false }); } }; r.readAsDataURL(f); }
-        document.getElementById('msg-input').oninput = (e) => { const s = document.getElementById('send-btn'), r = document.getElementById('record-btn'); if(e.target.value.trim().length > 0) { s.classList.remove('hidden'); r.classList.add('hidden'); } else { s.classList.add('hidden'); r.classList.remove('hidden'); } };
+
+        function listenMessages() {
+            const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
+            db.collection('chats').doc(cid).collection('messages').orderBy('ts').onSnapshot(snap => {
+                const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
+                snap.forEach(doc => {
+                    const data = doc.data(), isMe = data.sender === auth.currentUser.uid;
+                    const b = document.createElement('div');
+                    b.className = `bubble ${isMe ? 'bubble-me' : 'bubble-them'}`;
+                    
+                    if(data.type === 'text') b.innerText = data.content;
+                    else if(data.type === 'image') b.innerHTML = `<img src="${data.content}" class="media-msg">`;
+                    else if(data.type === 'video') b.innerHTML = `<video src="${data.content}" controls class="media-msg"></video>`;
+                    else if(data.type === 'voice') b.innerHTML = `<audio src="${data.content}" controls style="filter: invert(1); height: 35px; width: 180px;"></audio>`;
+                    
+                    b.oncontextmenu = (e) => { e.preventDefault(); if(confirm("ডিলিট করবেন?")) doc.ref.delete(); };
+                    mDiv.appendChild(b);
+                });
+                mDiv.scrollTop = mDiv.scrollHeight;
+            });
+        }
+
+        async function saveMsg(type, content) {
+            const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
+            await db.collection('chats').doc(cid).collection('messages').add({
+                sender: auth.currentUser.uid, type, content, ts: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        function sendTextMsg() {
+            const val = document.getElementById('msg-input').value;
+            if(val) { saveMsg('text', val); document.getElementById('msg-input').value = ''; updateIcons(); }
+        }
+
+        // মিডিয়া গ্যালারি
+        function triggerGallery() { document.getElementById('gallery-input').click(); }
+        function uploadMedia() {
+            const file = document.getElementById('gallery-input').files[0];
+            if(!file) return;
+            const r = new FileReader();
+            r.onload = (e) => {
+                const type = file.type.startsWith('image/') ? 'image' : 'video';
+                if(e.target.result.length > 1000000) return showToast("ফাইল অনেক বড়! ছোট ফাইল দিন।");
+                saveMsg(type, e.target.result);
+            };
+            r.readAsDataURL(file);
+        }
+
+        // ভয়েস রেকর্ডার ফিক্সড
+        async function handleVoice() {
+            if(!isRec) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onload = (e) => saveMsg('voice', e.target.result);
+                    reader.readAsDataURL(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mediaRecorder.start();
+                isRec = true;
+                document.getElementById('rec-timer').style.display = 'flex';
+                document.getElementById('msg-input').style.display = 'none';
+                let s = 0; recInt = setInterval(() => { s++; document.getElementById('timer-text').innerText = `0:${s<10?'0':''}${s}`; }, 1000);
+                document.getElementById('mic-btn').innerHTML = `<span class="material-icons-round">stop</span>`;
+            } else {
+                mediaRecorder.stop();
+                isRec = false;
+                document.getElementById('rec-timer').style.display = 'none';
+                document.getElementById('msg-input').style.display = 'block';
+                clearInterval(recInt);
+                document.getElementById('mic-btn').innerHTML = `<span class="material-icons-round">mic</span>`;
+            }
+        }
+
+        // কল লজিক
+        async function startCall() {
+            dt.play();
+            document.getElementById('call-name').innerText = document.getElementById('chat-user-name').innerText;
+            document.getElementById('call-img').src = document.getElementById('chat-user-img').src;
+            document.getElementById('call-ui').classList.remove('hidden');
+            await db.collection('calls').doc(currentChatId).set({ status: 'ringing', from: auth.currentUser.uid, name: auth.currentUser.email.split('@')[0], photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+        }
+
+        function listenForCalls() {
+            db.collection('calls').doc(auth.currentUser.uid).onSnapshot(s => {
+                const d = s.data();
+                if(d?.status === 'ringing') {
+                    rt.play();
+                    document.getElementById('call-name').innerText = d.name;
+                    document.getElementById('call-img').src = d.photo;
+                    document.getElementById('call-ui').classList.remove('hidden');
+                    document.getElementById('answer-btn').classList.remove('hidden');
+                    document.getElementById('call-stat').innerText = "ভিডিও কল আসছে...";
+                }
+                if(!s.exists) hangup();
+            });
+        }
+
+        function hangup() {
+            rt.pause(); dt.pause();
+            db.collection('calls').doc(auth.currentUser.uid).delete();
+            if(currentChatId) db.collection('calls').doc(currentChatId).delete();
+            document.getElementById('call-ui').classList.add('hidden');
+        }
+
+        function showMyId() { showToast("আপনার আইডি কপি হয়েছে!"); navigator.clipboard.writeText(auth.currentUser.uid); }
+
+        document.getElementById('msg-input').oninput = updateIcons;
+        function updateIcons() {
+            const v = document.getElementById('msg-input').value;
+            if(v.trim()) { document.getElementById('mic-btn').classList.add('hidden'); document.getElementById('send-btn').classList.remove('hidden'); }
+            else { document.getElementById('mic-btn').classList.remove('hidden'); document.getElementById('send-btn').classList.add('hidden'); }
+        }
     </script>
 </body>
 </html>
