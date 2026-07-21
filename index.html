@@ -12,244 +12,320 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-        body { font-family: 'Outfit', sans-serif; margin: 0; background-color: #000; color: white; height: 100vh; overflow: hidden; }
+        
+        /* আপনার ব্যাকগ্রাউন্ড এবং সাদা বার ফিক্স */
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; background-color: #000; color: white; height: 100vh; overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
+            background-image: url('bg.jpg'); /* আপনার ফটো */
+            background-size: cover;
+            background-position: center;
+        }
 
-        /* ড্রয়ার ও মেনু */
+        .dark-overlay { background: rgba(0, 0, 0, 0.75); height: 100%; width: 100%; display: flex; flex-direction: column; }
+
+        /* সাইড ড্রয়ার (Drawer) */
         #side-drawer { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; }
         #drawer-content { width: 85%; max-width: 320px; height: 100%; background: #1c1c1e; transition: 0.3s transform; transform: translateX(-100%); padding: 15px; }
         #side-drawer.open { display: block; }
         #side-drawer.open #drawer-content { transform: translateX(0); }
-
         .drawer-item { display: flex; items: center; gap: 15px; padding: 12px; border-radius: 12px; cursor: pointer; }
         .drawer-item.active { background: rgba(255, 255, 255, 0.08); color: #0084ff; }
 
-        /* চ্যাট লিস্ট */
+        /* ভিউ সেকশন */
         .view-section { display: none; height: calc(100vh - 100px); overflow-y: auto; padding: 15px; }
         .view-section.active { display: block; }
-        .active-dot { width: 14px; height: 14px; background: #31a24c; border: 2px solid #000; border-radius: 50%; position: absolute; bottom: 2px; right: 2px; }
 
-        /* আর্কাইভ মেনু (Context Menu) */
+        /* চ্যাট বাবল ডিজাইন */
+        #chat-window { position: fixed; inset: 0; z-index: 5000; display: none; flex-direction: column; background-image: url('bg.jpg'); background-size: cover; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.8); }
+        .bubble-me { background: #005c4b; border-radius: 18px; padding: 10px 15px; align-self: flex-end; max-width: 80%; }
+        .bubble-them { background: #202c33; border-radius: 18px; padding: 10px 15px; align-self: flex-start; max-width: 80%; }
+        .media-msg { border-radius: 12px; max-width: 250px; margin-bottom: 5px; }
+
+        /* কনটেক্সট মেনু (হোল্ড টু আর্কাইভ/ডিলিট) */
         #context-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #1c1c1e; border-radius: 25px 25px 0 0; padding: 25px; z-index: 15000; display: none; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
         .menu-btn { width: 100%; padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.05); font-weight: bold; margin-bottom: 10px; text-align: center; }
 
-        /* চ্যাট উইন্ডো */
-        #chat-window { position: fixed; inset: 0; z-index: 5000; display: none; flex-direction: column; background: #000; }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .bubble-me { background: #0084ff; border-radius: 18px; padding: 10px 15px; align-self: flex-end; max-width: 80%; }
-        .bubble-them { background: #333; border-radius: 18px; padding: 10px 15px; align-self: flex-start; max-width: 80%; }
+        /* স্টোরি রিং */
+        .story-ring { padding: 2px; border: 2px solid #0084ff; border-radius: 50%; width: 65px; height: 65px; }
     </style>
 </head>
 <body>
 
-    <!-- সাইড মেনু (Drawer) -->
-    <div id="side-drawer" onclick="toggleDrawer(false)">
-        <div id="drawer-content" onclick="event.stopPropagation()">
-            <div class="flex items-center gap-3 mb-8">
-                <img id="my-pfp-drawer" class="w-10 h-10 rounded-full object-cover">
-                <h4 id="my-name-drawer" class="font-bold text-sm">Loading...</h4>
+    <div class="dark-overlay">
+        <!-- ১. ড্রয়ার মেনু -->
+        <div id="side-drawer" onclick="toggleDrawer(false)">
+            <div id="drawer-content" onclick="event.stopPropagation()">
+                <div class="flex items-center gap-3 mb-8">
+                    <img id="my-pfp-drawer" class="w-10 h-10 rounded-full object-cover">
+                    <h4 id="my-name-drawer" class="font-bold text-sm">লোড হচ্ছে...</h4>
+                </div>
+                <div class="space-y-1">
+                    <div onclick="switchView('home')" class="drawer-item active"><span class="material-icons-round">chat</span> <b>Chats</b></div>
+                    <div onclick="switchView('marketplace')" class="drawer-item"><span class="material-icons-round">storefront</span> <b>Marketplace</b></div>
+                    <div onclick="switchView('archive')" class="drawer-item"><span class="material-icons-round">archive</span> <b>Archive</b></div>
+                </div>
             </div>
-            <div class="space-y-1">
-                <div onclick="switchView('home')" class="drawer-item active" id="btn-chats"><span class="material-icons-round">chat</span> <b>Chats</b></div>
-                <div onclick="switchView('marketplace')" class="drawer-item"><span class="material-icons-round">storefront</span> <b>Marketplace</b></div>
-                <div onclick="switchView('requests')" class="drawer-item"><span class="material-icons-round">message</span> <b>Message requests</b></div>
-                <div onclick="switchView('archive')" class="drawer-item" id="btn-archive"><span class="material-icons-round">archive</span> <b>Archive</b></div>
-                <div class="text-gray-500 text-xs mt-6 mb-2 px-3">More</div>
-                <div onclick="switchView('friend_requests')" class="drawer-item"><span class="material-icons-round">people</span> <b>Friend requests</b></div>
+        </div>
+
+        <!-- ২. মেইন হোম স্ক্রিন -->
+        <div id="main-ui" class="flex flex-col h-screen">
+            <header class="p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-icons-round text-3xl" onclick="toggleDrawer(true)">menu</span>
+                    <h1 id="view-title" class="text-2xl font-black tracking-tighter">messenger</h1>
+                </div>
+                <span class="material-icons-round bg-white/10 p-2 rounded-full">edit</span>
+            </header>
+
+            <div id="view-home" class="view-section active">
+                <!-- আইডি ইনপুট বক্স সবার উপরে -->
+                <div class="flex gap-2 mb-6">
+                    <input id="friend-id" placeholder="বন্ধুর আইডি দিন..." class="flex-1 bg-white/10 p-4 rounded-2xl outline-none border border-white/10">
+                    <button onclick="addAndChat()" class="bg-[#0084ff] px-6 rounded-2xl font-bold">যোগ</button>
+                </div>
+                <div id="chat-list" class="space-y-4"></div>
+            </div>
+
+            <div id="view-archive" class="view-section">
+                <h2 class="text-xl font-bold mb-4">Archive</h2>
+                <div id="archive-list" class="space-y-4"></div>
+            </div>
+
+            <div id="view-marketplace" class="view-section">
+                <h2 class="text-xl font-bold">Marketplace</h2>
+                <p class="text-gray-500 mt-10 text-center">এখনো কোনো পণ্য নেই।</p>
             </div>
         </div>
     </div>
 
-    <!-- মেইন ইউআই -->
-    <div id="main-ui" class="flex flex-col h-screen">
-        <header class="p-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <span class="material-icons-round text-3xl" onclick="toggleDrawer(true)">menu</span>
-                <h1 id="view-title" class="text-2xl font-black tracking-tighter">messenger</h1>
-            </div>
-            <span class="material-icons-round bg-white/10 p-2 rounded-full">edit</span>
-        </header>
-
-        <!-- হোম ভিউ (চ্যাট লিস্ট) -->
-        <div id="view-home" class="view-section active">
-            <div class="flex gap-2 mb-4">
-                <input id="friend-id" placeholder="বন্ধুর আইডি দিন..." class="flex-1 bg-[#1c1c1e] p-3 rounded-xl outline-none text-sm">
-                <button onclick="addAndChat()" class="bg-[#0084ff] px-6 rounded-xl font-bold">যোগ</button>
-            </div>
-            <div id="chat-list" class="space-y-4"></div>
-        </div>
-
-        <!-- আর্কাইভ ভিউ -->
-        <div id="view-archive" class="view-section">
-            <h2 class="text-xl font-bold mb-4 text-blue-500">Archived Chats</h2>
-            <div id="archive-list" class="space-y-4">
-                <p class="text-gray-500 text-center mt-10">কোনো চ্যাট আর্কাইভ করা নেই</p>
-            </div>
-        </div>
-
-        <!-- মার্কেটপ্লেস ও অন্যান্য -->
-        <div id="view-marketplace" class="view-section"><h2 class="text-xl font-bold mb-4">Marketplace</h2><p class="text-gray-500 text-center mt-10">পণ্য লোড হচ্ছে...</p></div>
-        <div id="view-requests" class="view-section"><p class="text-gray-500 text-center mt-10">মেসেজ রিকোয়েস্ট নেই</p></div>
-
-        <!-- বটম বার -->
-        <div class="mt-auto border-t border-white/5 flex justify-around py-3 pb-6">
-            <div onclick="switchView('home')" class="text-blue-500 text-center"><span class="material-icons-round text-3xl">chat</span><br><span class="text-[10px]">Chats</span></div>
-            <div onclick="switchView('friend_requests')" class="text-gray-500 text-center"><span class="material-icons-round text-3xl">people</span><br><span class="text-[10px]">Stories</span></div>
-        </div>
-    </div>
-
-    <!-- আর্কাইভ মেনু (Context Menu) -->
-    <div id="context-menu" onclick="hideContextMenu()">
-        <button id="archive-action-btn" class="menu-btn text-blue-500">Archive Chat</button>
-        <button class="menu-btn text-white" onclick="hideContextMenu()">Cancel</button>
-    </div>
-
-    <!-- চ্যাট উইন্ডো -->
+    <!-- ৩. চ্যাট উইন্ডো -->
     <div id="chat-window">
-        <div class="p-4 flex items-center gap-4 border-b border-white/5">
+        <div class="p-4 flex items-center gap-4 bg-[#202c33] text-white">
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
-            <img id="chat-user-img" class="w-10 h-10 rounded-full object-cover">
-            <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4><span class="text-green-500 text-[9px] uppercase">Online</span></div>
-            <button onclick="startCall()"><span class="material-icons-round text-blue-500 text-2xl">videocam</span></button>
+            <img id="chat-user-img" src="" class="w-10 h-10 rounded-full object-cover">
+            <div class="flex-1"><h4 id="chat-user-name" class="font-bold">...</h4></div>
+            <button onclick="startCall()"><span class="material-icons-round text-3xl text-blue-500">videocam</span></button>
         </div>
         <div id="messages"></div>
-        <div class="p-4 flex items-center gap-3 mb-6">
-            <input id="msg-input" placeholder="Aa" class="flex-1 bg-white/10 py-2 px-4 rounded-full outline-none text-sm text-white">
-            <button onclick="sendTextMsg()"><span class="material-icons-round text-blue-500 text-3xl">send</span></button>
+        <div class="p-4 bg-black flex items-center gap-3">
+            <span class="material-icons-round text-blue-500" onclick="triggerGallery()">add_circle</span>
+            <input id="msg-input" placeholder="Aa" class="flex-1 bg-white/10 p-3 rounded-full outline-none text-white">
+            <span id="mic-btn" class="material-icons-round text-blue-500 text-3xl" onclick="handleVoice()">mic</span>
+            <span id="send-btn" class="material-icons-round text-blue-500 text-3xl hidden" onclick="sendTextMsg()">send</span>
+        </div>
+        <input type="file" id="gallery-input" class="hidden" accept="image/*,video/*" onchange="uploadMedia()">
+    </div>
+
+    <!-- ৪. আর্কাইভ/ডিলিট মেনু -->
+    <div id="context-menu" onclick="hideContextMenu()">
+        <button id="archive-action-btn" class="menu-btn text-blue-500">Archive Chat</button>
+        <button class="menu-btn text-red-500" id="delete-action-btn">Delete Message</button>
+        <button class="menu-btn text-white">Cancel</button>
+    </div>
+
+    <!-- কলিং UI -->
+    <div id="call-ui" class="hidden fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center">
+        <img id="call-img" class="w-32 h-32 rounded-full border-4 border-blue-500 mb-6">
+        <h2 id="call-name" class="text-2xl font-bold">...</h2>
+        <div class="mt-20 flex gap-10">
+            <button onclick="hangup()" class="bg-red-600 p-6 rounded-full"><span class="material-icons-round text-3xl text-white">call_end</span></button>
+            <button id="answer-btn" onclick="answerCall()" class="hidden bg-green-500 p-6 rounded-full"><span class="material-icons-round text-3xl text-white">videocam</span></button>
         </div>
     </div>
+
+    <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
+    <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCv0-AIv6osWK_sPelrG_u-socZdlJfFDY", authDomain: "video-3d955.firebaseapp.com", projectId: "video-3d955", storageBucket: "video-3d955.firebasestorage.app", messagingSenderId: "1016513647050", appId: "1:1016513647050:web:c089c4da5f6c00eb53bf33" };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
 
-        let currentChatId, selectedFriendId, isArchiveMode = false;
+        let currentChatId, selectedId, mediaRecorder, chunks = [], isRec = false;
+        const rt = document.getElementById('ringtone'), dt = document.getElementById('dialtone');
 
-        function toggleDrawer(open) {
-            const dr = document.getElementById('side-drawer');
-            if(open) dr.classList.add('open'); else dr.classList.remove('open');
-        }
-
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('view-' + viewName).classList.add('active');
-            toggleDrawer(false);
-            if(viewName === 'archive') loadArchiveList();
-        }
-
+        // ১. অটো লগইন ও ব্যাকগ্রাউন্ড সিঙ্ক
         auth.onAuthStateChanged(user => {
             if(user) {
                 const name = user.email.split('@')[0];
-                const pfp = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
                 document.getElementById('my-name-drawer').innerText = name;
-                document.getElementById('my-pfp-drawer').src = pfp;
-                loadChatList();
+                document.getElementById('my-pfp-drawer').src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                loadChatList(); listenForCalls();
             } else {
-                let p = prompt("নম্বর দিন:");
+                let p = prompt("মোবাইল নম্বর দিন:");
                 if(p) auth.signInWithEmailAndPassword(p+"@soyel.com", "123456").catch(()=>auth.createUserWithEmailAndPassword(p+"@soyel.com", "123456"));
             }
         });
 
-        // চ্যাট লিস্ট (আর্কাইভ ছাড়া)
+        // ২. ড্রয়ার ও ভিউ কন্ট্রোল
+        function toggleDrawer(open) { document.getElementById('side-drawer').classList.toggle('open', open); }
+        function switchView(v) { 
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('view-'+v).classList.add('active');
+            if(v==='archive') loadArchiveList();
+            toggleDrawer(false); 
+        }
+
+        // ৩. চ্যাট লিস্ট লোড (আর্কাইভ লজিক সহ)
         function loadChatList() {
             db.collection('users').doc(auth.currentUser.uid).collection('friends').where('archived', '==', false).onSnapshot(snap => {
                 const list = document.getElementById('chat-list'); list.innerHTML = '';
                 snap.forEach(async d => {
                     const u = (await db.collection('users').doc(d.id).get()).data();
-                    if(!u) return;
-                    renderUser(list, u, false);
+                    if(u) renderUser(list, u, false);
                 });
             });
         }
 
-        // আর্কাইভ লিস্ট
         function loadArchiveList() {
             db.collection('users').doc(auth.currentUser.uid).collection('friends').where('archived', '==', true).onSnapshot(snap => {
                 const list = document.getElementById('archive-list'); list.innerHTML = '';
-                if(snap.empty) list.innerHTML = '<p class="text-gray-500 text-center mt-10">কোনো চ্যাট আর্কাইভ করা নেই</p>';
                 snap.forEach(async d => {
                     const u = (await db.collection('users').doc(d.id).get()).data();
-                    if(!u) return;
-                    renderUser(list, u, true);
+                    if(u) renderUser(list, u, true);
                 });
             });
         }
 
-        function renderUser(container, u, isArchived) {
-            const item = document.createElement('div');
-            item.className = "flex items-center gap-4 p-2 active:bg-white/5 rounded-xl transition-all relative";
-            item.innerHTML = `<div class="relative"><img src="${u.photo}" class="w-14 h-14 rounded-full object-cover"><div class="active-dot"></div></div><div class="flex-1"><h4 class="font-bold text-sm">${u.name}</h4><p class="text-xs text-gray-500">${isArchived ? '[আর্কাইভ করা]' : 'সরাসরি চ্যাট করুন...'}</p></div>`;
+        function renderUser(list, u, isArc) {
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-4 p-2 active:bg-white/5 rounded-xl";
+            div.innerHTML = `<img src="${u.photo}" class="w-14 h-14 rounded-full"><div class="flex-1"><h4 class="font-bold text-white">${u.name}</h4><p class="text-xs text-gray-500">${isArc?'আর্কাইভ করা':'সরাসরি চ্যাট করুন'}</p></div>`;
+            div.onclick = () => openChat(u.uid, u.name, u.photo);
             
-            // ক্লিক করলে চ্যাট ওপেন
-            item.onclick = () => openChat(u.uid, u.name, u.photo);
-            
-            // চেপে ধরলে মেনু ওপেন (Long Press)
-            let pressTimer;
-            item.onmousedown = item.ontouchstart = (e) => {
-                pressTimer = setTimeout(() => showContextMenu(u.uid, isArchived), 700);
-            };
-            item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
-            
-            container.appendChild(item);
+            // হোল্ড করে আর্কাইভ মেনু
+            let t;
+            div.onmousedown = div.ontouchstart = () => t = setTimeout(() => showMenu(u.uid, isArc), 700);
+            div.onmouseup = div.ontouchend = () => clearTimeout(t);
+            list.appendChild(div);
         }
 
-        function showContextMenu(uid, isArchived) {
-            selectedFriendId = uid;
-            isArchiveMode = isArchived;
-            const btn = document.getElementById('archive-action-btn');
-            btn.innerText = isArchived ? "Unarchive Chat" : "Archive Chat";
-            btn.onclick = toggleArchiveStatus;
+        function showMenu(id, isArc) {
+            selectedId = id;
+            document.getElementById('archive-action-btn').innerText = isArc ? "Unarchive" : "Archive";
             document.getElementById('context-menu').style.display = 'block';
-            if(window.navigator.vibrate) window.navigator.vibrate(50);
+            document.getElementById('archive-action-btn').onclick = async () => {
+                await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).update({archived: !isArc});
+                hideContextMenu();
+            };
         }
-
         function hideContextMenu() { document.getElementById('context-menu').style.display = 'none'; }
 
-        async function toggleArchiveStatus() {
-            const status = !isArchiveMode;
-            await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(selectedFriendId).update({ archived: status });
-            hideContextMenu();
-            alert(status ? "চ্যাট আর্কাইভ করা হয়েছে" : "চ্যাট হোম স্ক্রিনে ফিরে গেছে");
-        }
-
-        // চ্যাট উইন্ডো লজিক
-        function openChat(id, name, img) {
+        // ৪. চ্যাট মেসেজ সিস্টেম (ভয়েস ও ভিডিও ফিক্স)
+        function openChat(id, n, p) {
             currentChatId = id;
-            document.getElementById('chat-user-name').innerText = name;
-            document.getElementById('chat-user-img').src = img;
+            document.getElementById('chat-user-name').innerText = n;
+            document.getElementById('chat-user-img').src = p;
             document.getElementById('chat-window').style.display = 'flex';
-            listenMessages();
-        }
-        function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-
-        function listenMessages() {
-            const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
+            const cid = auth.currentUser.uid < id ? auth.currentUser.uid+"_"+id : id+"_"+auth.currentUser.uid;
             db.collection('chats').doc(cid).collection('messages').orderBy('ts').onSnapshot(snap => {
                 const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
                 snap.forEach(doc => {
-                    const data = doc.data(), isMe = data.sender === auth.currentUser.uid;
-                    const b = document.createElement('div'); b.className = isMe ? 'bubble-me' : 'bubble-them';
-                    b.innerText = data.content;
+                    const d = doc.data(), isMe = d.sender === auth.currentUser.uid;
+                    const b = document.createElement('div');
+                    b.className = isMe ? 'bubble-me' : 'bubble-them';
+                    if(d.type === 'text') b.innerText = d.content;
+                    else if(d.type === 'image') b.innerHTML = `<img src="${d.content}" class="media-msg">`;
+                    else if(d.type === 'video') b.innerHTML = `<video src="${d.content}" controls class="media-msg"></video>`;
+                    else if(d.type === 'voice') b.innerHTML = `<audio src="${d.content}" controls style="filter:invert(1);height:30px;width:150px"></audio>`;
                     mDiv.appendChild(b);
                 });
                 mDiv.scrollTop = mDiv.scrollHeight;
             });
         }
+        function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
 
-        async function sendTextMsg() {
-            const val = document.getElementById('msg-input').value; if(!val) return;
-            const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
-            await db.collection('chats').doc(cid).collection('messages').add({ sender: auth.currentUser.uid, content: val, ts: firebase.firestore.FieldValue.serverTimestamp() });
-            document.getElementById('msg-input').value = '';
+        async function saveMsg(type, content) {
+            const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid+"_"+currentChatId : currentChatId+"_"+auth.currentUser.uid;
+            await db.collection('chats').doc(cid).collection('messages').add({ sender: auth.currentUser.uid, type, content, ts: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
+        function sendTextMsg() {
+            const val = document.getElementById('msg-input').value;
+            if(val) { saveMsg('text', val); document.getElementById('msg-input').value = ''; updateUI(); }
+        }
+
+        // মিডিয়া গ্যালারি ফিক্স
+        function triggerGallery() { document.getElementById('gallery-input').click(); }
+        function uploadMedia() {
+            const file = document.getElementById('gallery-input').files[0];
+            const r = new FileReader();
+            r.onload = (e) => {
+                const type = file.type.startsWith('image') ? 'image' : 'video';
+                if(e.target.result.length > 1000000) return alert("ফাইল সাইজ ১ মেগাবাইটের বেশি হতে পারবে না।");
+                saveMsg(type, e.target.result);
+            };
+            r.readAsDataURL(file);
+        }
+
+        // ভয়েস রেকর্ড ফিক্স
+        async function handleVoice() {
+            if(!isRec) {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s); chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const r = new FileReader();
+                    r.onload = (e) => saveMsg('voice', e.target.result);
+                    r.readAsDataURL(blob);
+                };
+                mediaRecorder.start(); isRec = true;
+                document.getElementById('mic-btn').innerText = 'stop';
+            } else {
+                mediaRecorder.stop(); isRec = false;
+                document.getElementById('mic-btn').innerText = 'mic';
+            }
+        }
+
+        // ৫. বন্ধু অ্যাড
         async function addAndChat() {
             const id = document.getElementById('friend-id').value.trim();
             const doc = await db.collection('users').doc(id).get();
             if(doc.exists) {
-                await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).set({added: true, archived: false});
+                await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).set({archived: false});
                 openChat(id, doc.data().name, doc.data().photo);
+                document.getElementById('friend-id').value = '';
             }
+        }
+
+        // ৬. কলিং সিস্টেম
+        async function startCall() {
+            dt.play(); document.getElementById('call-ui').classList.remove('hidden');
+            document.getElementById('call-name').innerText = document.getElementById('chat-user-name').innerText;
+            document.getElementById('call-img').src = document.getElementById('chat-user-img').src;
+            await db.collection('calls').doc(currentChatId).set({ status: 'ringing', name: auth.currentUser.email.split('@')[0], photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+        }
+
+        function listenForCalls() {
+            db.collection('calls').doc(auth.currentUser.uid).onSnapshot(s => {
+                const d = s.data();
+                if(d?.status === 'ringing') {
+                    rt.play();
+                    document.getElementById('call-ui').classList.remove('hidden');
+                    document.getElementById('answer-btn').classList.remove('hidden');
+                    document.getElementById('call-name').innerText = d.name;
+                    document.getElementById('call-img').src = d.photo;
+                }
+                if(!s?.exists) hangup();
+            });
+        }
+
+        function hangup() {
+            rt.pause(); dt.pause();
+            db.collection('calls').doc(auth.currentUser.uid).delete();
+            document.getElementById('call-ui').classList.add('hidden');
+        }
+
+        // বাটন আপডেট
+        document.getElementById('msg-input').oninput = updateUI;
+        function updateUI() {
+            const v = document.getElementById('msg-input').value;
+            if(v) { document.getElementById('mic-btn').classList.add('hidden'); document.getElementById('send-btn').classList.remove('hidden'); }
+            else { document.getElementById('mic-btn').classList.remove('hidden'); document.getElementById('send-btn').classList.add('hidden'); }
         }
     </script>
 </body>
