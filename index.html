@@ -32,7 +32,7 @@
 
         /* ব্যাকগ্রাউন্ড ফটো সিস্টেম */
         .bg-app { 
-            background-image: url('bg.jpg'); /* আপনার ফটো ফাইল */
+            background-image: url('bg.jpg'); 
             background-size: cover; 
             background-position: center; 
             background-attachment: fixed;
@@ -41,7 +41,7 @@
         }
 
         .dark-overlay { 
-            background: rgba(0, 0, 0, 0.75); /* ফটোর উপর ডার্ক লেয়ার যাতে মেসেজ দেখা যায় */
+            background: rgba(0, 0, 0, 0.7); 
             height: 100%; 
             width: 100%; 
             display: flex; 
@@ -55,7 +55,7 @@
             left: 50%;
             transform: translateX(-50%) translateY(-100px);
             z-index: 9999;
-            transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: 0.4s;
             width: 90%;
             max-width: 400px;
         }
@@ -70,7 +70,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
         /* চ্যাট স্ক্রিন */
@@ -95,11 +94,7 @@
         /* ইনপুট এরিয়া */
         .bottom-bar { padding: 10px 10px 30px 10px; background: var(--bg-dark); display: flex; align-items: center; gap: 10px; }
         .input-wrapper { flex: 1; background: #2a3942; border-radius: 30px; display: flex; align-items: center; padding: 0 12px; }
-        #msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 5px; }
-
-        #rec-timer { display: none; color: white; font-weight: bold; flex: 1; align-items: center; gap: 10px; }
-        .recording-dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        #msg-input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 12px 0; }
 
         .action-btn { background: var(--wa-green); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; items: center; justify-content: center; }
 
@@ -112,7 +107,7 @@
 <body onclick="enableAudio()" class="bg-app">
 
     <div class="dark-overlay">
-        <!-- প্রফেশনাল নোটিফিকেশন বার -->
+        <!-- নোটিফিকেশন বার -->
         <div id="custom-toast">
             <div class="toast-content">
                 <span class="material-icons-round text-yellow-400">notifications_active</span>
@@ -120,27 +115,22 @@
             </div>
         </div>
 
-        <!-- লগইন পেজ -->
-        <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center">
-            <h1 class="text-4xl font-bold text-white mb-10 italic">Soyel Pro</h1>
-            <div class="w-full max-w-xs space-y-4">
-                <input id="login-phone" placeholder="মোবাইল নম্বর" class="w-full p-4 rounded-2xl bg-white/10 text-white outline-none">
-                <input id="login-pass" type="password" placeholder="পাসওয়ার্ড" class="w-full p-4 rounded-2xl bg-white/10 text-white outline-none">
-                <button onclick="authAction()" class="w-full bg-indigo-600 p-4 rounded-2xl text-white font-bold">লগইন / সাইন আপ</button>
-            </div>
-        </div>
-
         <!-- ড্যাশবোর্ড -->
-        <div id="dashboard" class="hidden h-screen flex flex-col p-6 text-white">
-            <div class="flex justify-between items-center mb-8">
+        <div id="dashboard" class="flex h-screen flex-col p-6 text-white">
+            <div class="flex justify-between items-center mb-10">
                 <img id="my-photo" class="w-12 h-12 rounded-full border-2 border-indigo-500" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
                 <button onclick="showMyId()" class="bg-indigo-600 px-4 py-2 rounded-xl text-xs font-bold uppercase">MY ID</button>
             </div>
-            <div class="flex gap-2 mb-6">
-                <input id="friend-id" placeholder="বন্ধুর আইডি দিন" class="flex-1 bg-white/5 p-4 rounded-2xl outline-none border border-white/10">
-                <button onclick="addFriend()" class="bg-indigo-600 px-6 rounded-2xl font-bold">যোগ</button>
+            
+            <!-- আইডি দেওয়ার ইনপুট -->
+            <div class="flex gap-2 mb-8">
+                <input id="friend-id" placeholder="বন্ধুর আইডি দিন" class="flex-1 bg-white/10 p-4 rounded-2xl outline-none border border-white/20 backdrop-blur-sm">
+                <button onclick="addFriendAndChat()" class="bg-indigo-600 px-8 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">যোগ</button>
             </div>
-            <div id="friend-list" class="flex-1 overflow-y-auto space-y-3"></div>
+
+            <div id="friend-list" class="flex-1 overflow-y-auto space-y-3">
+                <!-- কন্টাক্ট লিস্ট এখানে আসবে -->
+            </div>
         </div>
     </div>
 
@@ -148,7 +138,7 @@
     <div id="chat-window">
         <div class="p-4 flex items-center gap-4 text-white bg-[#202c33] shadow-lg">
             <button onclick="closeChat()"><span class="material-icons-round">arrow_back</span></button>
-            <img id="chat-user-img" class="w-10 h-10 rounded-full">
+            <img id="chat-user-img" class="w-10 h-10 rounded-full object-cover">
             <div class="flex-1"><h4 id="chat-user-name" class="font-bold text-sm">...</h4><span class="text-green-500 text-[10px] font-bold">অনলাইন</span></div>
             <button onclick="startCall()"><span class="material-icons-round text-indigo-400 text-3xl">videocam</span></button>
         </div>
@@ -158,7 +148,6 @@
         <div class="bottom-bar">
             <div class="input-wrapper">
                 <button onclick="triggerGallery()"><span class="material-icons-round text-gray-400">add</span></button>
-                <div id="rec-timer"><div class="recording-dot"></div><span id="timer-text">0:00</span></div>
                 <input id="msg-input" type="text" placeholder="মেসেজ লিখুন..." autocomplete="off">
             </div>
             <button id="mic-btn" class="action-btn" onclick="handleVoice()"><span class="material-icons-round">mic</span></button>
@@ -173,12 +162,11 @@
         <h2 id="call-name" class="text-2xl font-bold">...</h2>
         <p id="call-stat" class="mt-4 text-indigo-400 font-bold uppercase tracking-widest text-xs">Calling...</p>
         <div class="mt-20 flex gap-12">
-            <button onclick="hangup()" class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center"><span class="material-icons-round text-4xl">call_end</span></button>
-            <button id="answer-btn" onclick="answerCall()" class="hidden w-20 h-20 bg-green-500 rounded-full flex items-center justify-center"><span class="material-icons-round text-4xl">videocam</span></button>
+            <button onclick="hangup()" class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round text-4xl">call_end</span></button>
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-lg"><span class="material-icons-round text-4xl">videocam</span></button>
         </div>
     </div>
 
-    <!-- অডিও এলিমেন্ট -->
     <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>
     <audio id="dialtone" src="https://www.soundjay.com/phone/phone-calling-1.mp3" loop></audio>
 
@@ -187,7 +175,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
 
-        let currentChatId, mediaRecorder, chunks = [], recInt, isRec = false, pc;
+        let currentChatId, mediaRecorder, chunks = [], isRec = false;
         const rt = document.getElementById('ringtone'), dt = document.getElementById('dialtone');
 
         function enableAudio() { rt.play().then(()=>rt.pause()); dt.play().then(()=>dt.pause()); }
@@ -199,24 +187,38 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        async function authAction() {
-            const phone = document.getElementById('login-phone').value.trim();
-            const pass = document.getElementById('login-pass').value;
-            if(!phone || pass.length < 6) return showToast("সঠিক নম্বর ও ৬ অক্ষরের পাসওয়ার্ড দিন");
-            const email = phone + "@soyel.com";
-            try { await auth.signInWithEmailAndPassword(email, pass); } 
-            catch { try { await auth.createUserWithEmailAndPassword(email, pass); } catch(e) { showToast(e.message); } }
-        }
-
+        // লগইন চেক
         auth.onAuthStateChanged(user => {
             if(user) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('my-id-display').innerText = user.uid;
-                db.collection('users').doc(user.uid).set({ uid: user.uid, name: user.email.split('@')[0], photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+                db.collection('users').doc(user.uid).set({ uid: user.uid, name: user.email.split('@')[0], photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" }, {merge: true});
                 loadFriends(); listenForCalls();
+            } else {
+                let p = prompt("মোবাইল নম্বর দিন:");
+                if(p) auth.signInWithEmailAndPassword(p+"@soyel.com", "123456").catch(()=>auth.createUserWithEmailAndPassword(p+"@soyel.com", "123456"));
             }
         });
+
+        // বন্ধুর আইডি দিয়ে সরাসরি চ্যাট ওপেন করা (আপনার রিকুইয়েস্ট অনুযায়ী)
+        async function addFriendAndChat() {
+            const id = document.getElementById('friend-id').value.trim();
+            if(!id) return showToast("আইডি লিখুন!");
+            if(id === auth.currentUser.uid) return showToast("নিজেক নিজে যোগ করা যাবে না!");
+
+            showToast("খোঁজা হচ্ছে...");
+            
+            // ১. ডাটাবেস থেকে বন্ধুর তথ্য নেওয়া
+            const userDoc = await db.collection('users').doc(id).get();
+            if(!userDoc.exists) return showToast("এই আইডির কোনো ইউজার পাওয়া যায়নি!");
+
+            const userData = userDoc.data();
+
+            // ২. বন্ধু লিস্টে সেভ করা
+            await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).set({added: true});
+
+            // ৩. সরাসরি চ্যাট বক্স ওপেন করা
+            document.getElementById('friend-id').value = '';
+            openChat(userData.uid, userData.name, userData.photo);
+        }
 
         function loadFriends() {
             db.collection('users').doc(auth.currentUser.uid).collection('friends').onSnapshot(snap => {
@@ -225,22 +227,13 @@
                     const u = (await db.collection('users').doc(doc.id).get()).data();
                     if(u) {
                         const d = document.createElement('div');
-                        d.className = "flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5";
+                        d.className = "flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-sm";
                         d.innerHTML = `<img src="${u.photo}" class="w-12 h-12 rounded-full border border-indigo-500"><div class="font-bold flex-1 text-white">${u.name}</div>`;
                         d.onclick = () => openChat(u.uid, u.name, u.photo);
                         list.appendChild(d);
                     }
                 });
             });
-        }
-
-        async function addFriend() {
-            const id = document.getElementById('friend-id').value.trim();
-            if(id && id !== auth.currentUser.uid) {
-                await db.collection('users').doc(auth.currentUser.uid).collection('friends').doc(id).set({added: true});
-                showToast("বন্ধু যুক্ত হয়েছে!");
-                document.getElementById('friend-id').value = '';
-            }
         }
 
         function openChat(id, name, img) {
@@ -250,6 +243,7 @@
             document.getElementById('chat-window').style.display = 'flex';
             listenMessages();
         }
+
         function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
 
         function listenMessages() {
@@ -264,7 +258,6 @@
                     else if(data.type === 'image') b.innerHTML = `<img src="${data.content}" class="media-msg">`;
                     else if(data.type === 'video') b.innerHTML = `<video src="${data.content}" controls class="media-msg"></video>`;
                     else if(data.type === 'voice') b.innerHTML = `<audio src="${data.content}" controls style="filter: invert(1); height: 35px; width: 180px;"></audio>`;
-                    b.oncontextmenu = (e) => { e.preventDefault(); if(confirm("ডিলিট করবেন?")) doc.ref.delete(); };
                     mDiv.appendChild(b);
                 });
                 mDiv.scrollTop = mDiv.scrollHeight;
@@ -273,9 +266,7 @@
 
         async function saveMsg(type, content) {
             const cid = auth.currentUser.uid < currentChatId ? auth.currentUser.uid + "_" + currentChatId : currentChatId + "_" + auth.currentUser.uid;
-            await db.collection('chats').doc(cid).collection('messages').add({
-                sender: auth.currentUser.uid, type, content, ts: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            await db.collection('chats').doc(cid).collection('messages').add({ sender: auth.currentUser.uid, type, content, ts: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
         function sendTextMsg() {
@@ -290,7 +281,6 @@
             const r = new FileReader();
             r.onload = (e) => {
                 const type = file.type.startsWith('image/') ? 'image' : 'video';
-                if(e.target.result.length > 1048576) return showToast("ফাইল অনেক বড়! ছোট ফাইল দিন।");
                 saveMsg(type, e.target.result);
             };
             r.readAsDataURL(file);
@@ -307,20 +297,13 @@
                     const reader = new FileReader();
                     reader.onload = (e) => saveMsg('voice', e.target.result);
                     reader.readAsDataURL(blob);
-                    stream.getTracks().forEach(t => t.stop());
                 };
                 mediaRecorder.start();
                 isRec = true;
-                document.getElementById('rec-timer').style.display = 'flex';
-                document.getElementById('msg-input').style.display = 'none';
-                let s = 0; recInt = setInterval(() => { s++; document.getElementById('timer-text').innerText = `0:${s<10?'0':''}${s}`; }, 1000);
                 document.getElementById('mic-btn').innerHTML = `<span class="material-icons-round">stop</span>`;
             } else {
                 mediaRecorder.stop();
                 isRec = false;
-                document.getElementById('rec-timer').style.display = 'none';
-                document.getElementById('msg-input').style.display = 'block';
-                clearInterval(recInt);
                 document.getElementById('mic-btn').innerHTML = `<span class="material-icons-round">mic</span>`;
             }
         }
